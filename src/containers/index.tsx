@@ -1,5 +1,5 @@
 import {useEffect, useState}  from 'react';
-import { Routes, Route, useLocation, useNavigate, NavLink } from 'react-router-dom';
+import { Routes, Route, useLocation, NavLink } from 'react-router-dom';
 import { BiMenu } from "react-icons/bi";
 import {AiFillCloseCircle} from 'react-icons/ai';
 import { FaCircleMinus, FaCirclePlus, FaSquareEnvelope, FaSquareFacebook, FaSquareInstagram, FaSquareXTwitter } from 'react-icons/fa6';
@@ -94,7 +94,7 @@ const IndexRoutes = () => {
           <NavLink to='/faqs' className={`${(pathname === '/faqs') ? 'text-blue-800' : ''} p-5  font-semibold`}>
             FAQs
           </NavLink>
-          <NavLink to='/terms' className={`${(pathname === '/terms') ? 'text-blue-800' : ''} p-5  font-semibold`}>
+          <NavLink to='/about' className={`${(pathname === '/about') ? 'text-blue-800' : ''} p-5  font-semibold`}>
             Terms
           </NavLink>
         </div>

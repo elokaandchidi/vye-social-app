@@ -1,31 +1,133 @@
 import { useState } from "react";
 import { FaCaretDown } from "react-icons/fa6";
 import { BsCloudUploadFill } from "react-icons/bs";
-import { AgeGroupList, ProductList, StateList } from "../../utils/common";
 import Footer from "../reuseables/footer";
 import { isMobile } from "react-device-detect";
+import { BiCheckSquare, BiRadioCircle, BiRadioCircleMarked, BiSquare } from "react-icons/bi";
+import { AgeGroupList, ProductList, StateList } from "../../utils/common";
+import {client} from "../../utils/client";
+import { useAlert } from "../../utils/notification/alertcontext";
+import { EMAIL_REGEX } from "../../utils/regex";
 
-const Home = () => { 
+
+interface InfoDocument {
+  _type: string;
+  price: string;
+  product: string;
+  agegroup: string;
+  gender: string;
+  email: string;
+  mobile: string;
+  location: string;
+  addtionalInfo: string;
+  receiptFile?: {
+    _type: string;
+    asset: {
+      _type: string;
+      _ref: string;
+    };
+  };
+}
+
+const Home = () => {
+  const { addAlert } = useAlert();
   const [showProductDropdown, setShowProductDropdown] = useState(false);
   const [showAgeGroupDropdown, setShowAgeGroupDropdown] = useState(false);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
-  const [formInfo, setFormInfo] = useState({title: '', product: '', agegroup: '', location:'', file: null,});
+  const [fileName, setFileName] = useState('');
+  const [term, setTerm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formInfo, setFormInfo] = useState({price: '', product: '', agegroup: '', gender: '', email: '', mobile: '', location:'', file: null, addtionalInfo:''});
 
   const handleFileChange = (event: any) => {
-    console.log(event.target.files[0]);
     const selectedFile = event.target.files[0];
+    setFileName(selectedFile.name)    
     setFormInfo({...formInfo, file: selectedFile});
   };
 
   const handleDrop = (event: any) => {
     event.preventDefault();
-    const selectedFile = event.dataTransfer.files[0];    
+    const selectedFile = event.dataTransfer.files[0];
+    setFileName(selectedFile.name) 
     setFormInfo({...formInfo, file: selectedFile});
   };
+
 
   const handleDragOver = (event: any) => {
     event.preventDefault();
   };
+  
+  const handleSubmit = async () => {  
+    setIsSubmitting(true);
+    const { price, product, agegroup, gender, email, mobile, location, addtionalInfo, file } = formInfo;
+  
+    const requiredFields = [
+      { field: product, message: 'Please select product' },
+      { field: email, message: 'Please add email' },
+      { field: mobile, message: 'Please add mobile' },
+      { field: price, message: 'Please add price' },
+      { field: location, message: 'Please select location' },
+      { field: gender, message: 'Please select gender' },
+      { field: agegroup, message: 'Please select age group' }
+    ];
+  
+    for (const { field, message } of requiredFields) {
+      if (!field) {
+        setIsSubmitting(false);
+        return addAlert({ message, type: 'error' });
+      }
+    }
+
+    if(!EMAIL_REGEX.test(email)) {
+      setIsSubmitting(false);
+      return addAlert({ message:'Invalid email provided', type: 'error' });
+    }
+    
+    if(!term) {
+      setIsSubmitting(false);
+      return addAlert({ message:'Please accept terms', type: 'error' });
+    }
+  
+    let doc: InfoDocument = {
+      _type: 'info',
+      price,
+      product,
+      agegroup,
+      gender,
+      email,
+      mobile,
+      location,
+      addtionalInfo
+    };    
+    
+    if (file) {
+      const uploadedFile = await client.assets.upload('file', file);
+
+      doc = {
+        ...doc,
+        receiptFile: {
+          _type: 'file',
+          asset: {
+            _type: 'reference',
+            _ref: uploadedFile._id
+          }
+        }
+      };
+    }
+
+    try {
+      await client.create(doc)
+      setFormInfo({price: '', product: '', agegroup: '', gender: '', email: '', mobile: '', location:'', file: null, addtionalInfo:''})
+      setTerm(false)
+      setIsSubmitting(false);
+      addAlert({ message: 'Form submitted successfully', type: 'success' });
+    } catch (error) {
+      console.log(error);
+      setIsSubmitting(false);
+      addAlert({ message:'error occurred while submitting form', type: 'error' });
+    }
+  };
+  
 
   return (
     <div className='flex flex-col w-full lg:items-center h-full overflow-auto lg:text-[1.5rem] text-[1rem] transaction-height duration-75 ease-out'>
@@ -42,10 +144,10 @@ const Home = () => {
           <div className="flex flex-col relative w-full">
             <label className="text-[0.875rem] pb-2">Product or Service</label>
             <div className='flex flex-row items-center p-3 border border-gray-500 rounded-lg justify-between w-full text-center'>
-              <input type='text' placeholder="Select the product or service you purchased" readOnly className='w-full text-[.9rem] focus:outline-none'/>
+              <input type='text' value={formInfo.product} placeholder="Select the product or service you purchased" readOnly className='w-full text-[.9rem] focus:outline-none'/>
               <FaCaretDown onClick={()=> setShowProductDropdown(!showProductDropdown)} className='cursor-pointer'/>
             </div>
-            <div className={`${showProductDropdown ? '' : 'hidden' } flex mt-[2.3rem] text-[.9rem] z-30 h-[10rem] overflow-auto bg-white rounded-b-lg absolute shadow-lg w-full text-blue flex-col`}>
+            <div className={`${showProductDropdown ? '' : 'hidden' } flex mt-[5rem] text-[.9rem] z-30 h-[10rem] overflow-auto bg-white rounded-b-lg absolute shadow-lg w-full text-blue flex-col`}>
               {ProductList?.map((product, index) => 
                 <div key={index} onClick={() =>[setFormInfo({ ...formInfo, product: product }), setShowProductDropdown(!showProductDropdown)]} className='flex flex-row hover:bg-[#045BB0] hover:text-white capitalize py-2 px-3 cursor-pointer'>
                   {product}
@@ -60,8 +162,8 @@ const Home = () => {
             <input
               type="number"
               placeholder="Enter price of product or service here"
-              value={formInfo.title}
-              onChange={({ target}) => {setFormInfo({ ...formInfo, title: target.value })}}
+              value={formInfo.price}
+              onChange={({ target}) => {setFormInfo({ ...formInfo, price: target.value })}}
               className='w-full mt-3 text-[.9rem] border rounded-lg bg-transparent border-gray-500 p-3 focus:outline-none'
             />
           </div>
@@ -71,7 +173,7 @@ const Home = () => {
               <input type='text' placeholder="Select location" readOnly value={formInfo.location} className='w-full text-[.9rem] focus:outline-none'/>
               <FaCaretDown onClick={()=> setShowLocationDropdown(!showLocationDropdown)} className='cursor-pointer'/>
             </div>
-            <div className={`${showLocationDropdown ? '' : 'hidden' } flex mt-[2.3rem] text-[.9rem] z-30 h-[10rem] overflow-auto bg-white rounded-b-lg absolute shadow-lg w-full text-blue flex-col`}>
+            <div className={`${showLocationDropdown ? '' : 'hidden' } flex mt-[5rem] text-[.9rem] z-30 h-[10rem] overflow-auto bg-white rounded-b-lg absolute shadow-lg w-full text-blue flex-col`}>
               {StateList?.map((state, index) => 
                 <div key={index} onClick={() =>[setFormInfo({ ...formInfo, location: state }), setShowLocationDropdown(!showLocationDropdown)]} className='flex flex-row hover:bg-[#045BB0] hover:text-white capitalize py-2 px-3 cursor-pointer'>
                   {state}
@@ -83,11 +185,13 @@ const Home = () => {
             <label className="text-[0.875rem] pb-2">Gender</label>
             <div className='flex flex-row text-[.9rem] items-center gap-3 justify-start'>
               <div className='flex flex-row items-center gap-3 justify-start'>
-                <input type='radio' className=''/>
+                <BiRadioCircle className={`${(formInfo.gender === 'female' ) ? 'hidden' : ''} text-xl`} onClick={() => setFormInfo({ ...formInfo, gender: 'female' })} />
+                <BiRadioCircleMarked className={`${formInfo.gender !== 'female' ? 'hidden' : ''} text-xl`}/>
                 Female
               </div>
               <div className='flex flex-row items-center gap-3 justify-start'>
-                <input type='radio' className=''/>
+                <BiRadioCircle className={`${formInfo.gender === 'male' ? 'hidden' : ''} text-xl`} onClick={() => setFormInfo({ ...formInfo, gender: 'male' })} />
+                <BiRadioCircleMarked className={`${formInfo.gender !== 'male' ? 'hidden' : ''} text-xl`}/>
                 Male
               </div>
             </div>
@@ -98,7 +202,7 @@ const Home = () => {
               <input type='text' placeholder="Select age group" value={formInfo.agegroup} readOnly className='w-full text-[.9rem] focus:outline-none'/>
               <FaCaretDown onClick={()=> setShowAgeGroupDropdown(!showAgeGroupDropdown)} className='cursor-pointer'/>
             </div>
-            <div className={`${showAgeGroupDropdown ? '' : 'hidden' } flex mt-[2.3rem] text-[.9rem] z-30 bg-white rounded-b-lg absolute shadow-lg w-full text-blue flex-col`}>
+            <div className={`${showAgeGroupDropdown ? '' : 'hidden' } flex mt-[5rem] text-[.9rem] z-30 bg-white rounded-b-lg absolute shadow-lg w-full text-blue flex-col`}>
               {AgeGroupList?.map((age, index) => 
                 <div key={index} onClick={() =>[setFormInfo({ ...formInfo, agegroup: age }), setShowAgeGroupDropdown(!showAgeGroupDropdown)]} className='flex flex-row hover:bg-[#045BB0] hover:text-white capitalize py-2 px-3 cursor-pointer'>
                   {age}
@@ -107,33 +211,33 @@ const Home = () => {
             </div>
           </div>
           <div className='flex flex-col w-full'>
-            <div className='text-[.9rem] gap-3'>
+            <div className='text-[.9rem] gap-3 pb-2'>
               Email
             </div>
             <input
               type="email"
               placeholder="Enter your email address"
-              value={formInfo.title}
-              onChange={({ target}) => {setFormInfo({ ...formInfo, title: target.value })}}
-              className='w-full mt-3 text-[.9rem] border rounded-lg bg-transparent border-gray-500 p-3 focus:outline-none'
+              value={formInfo.email}
+              onChange={({ target}) => {setFormInfo({ ...formInfo, email: target.value })}}
+              className='w-full text-[.9rem] border rounded-lg bg-transparent border-gray-500 p-3 focus:outline-none'
             />
           </div>
 
           <div className='flex flex-col w-full'>
-            <div className='text-[.9rem] gap-3'>
+            <div className='text-[.9rem] gap-3 pb-2'>
               Phone Number
             </div>
             <input
-              type="email"
+              type="number"
               placeholder="Enter your phone number"
-              value={formInfo.title}
-              onChange={({ target}) => {setFormInfo({ ...formInfo, title: target.value })}}
-              className='w-full mt-3 text-[.9rem] border rounded-lg bg-transparent border-gray-500 p-3 focus:outline-none'
+              value={formInfo.mobile}
+              onChange={({ target}) => {setFormInfo({ ...formInfo, mobile: target.value })}}
+              className='w-full text-[.9rem] border rounded-lg bg-transparent border-gray-500 p-3 focus:outline-none'
             />
           </div>
 
           <div className='flex flex-col w-full'>
-            <div className='text-[.9rem] gap-3'>
+            <div className='text-[.9rem] gap-3 pb-2'>
               Receipt (optional)
             </div>
             <div
@@ -141,7 +245,11 @@ const Home = () => {
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
               >
-                <BsCloudUploadFill className="text-[#045BB0] text-[1.5rem]"/>
+                {fileName ? (
+                  <div className='text-[1rem]'>{fileName}</div>
+                ) : (
+                  <BsCloudUploadFill className="text-[#045BB0] text-[1.5rem]"/>
+                )}
 
                 <label htmlFor="fileInput" className="cursor-pointer text-[.9rem]">
                   Drop your file here or <span className="text-[#045BB0]">click here</span> to upload
@@ -162,24 +270,24 @@ const Home = () => {
               Addtional Info
             </div>
             <textarea
-              value={formInfo.title}
-              onChange={({ target}) => {setFormInfo({ ...formInfo, title: target.value })}}
+              value={formInfo.addtionalInfo}
+              onChange={({ target}) => {setFormInfo({ ...formInfo, addtionalInfo: target.value })}}
               className='w-full mt-3 text-[.9rem] border rounded-lg bg-transparent border-gray-500 p-3 focus:outline-none'
             />
           </div>
 
           <div className="flex flex-row items-center gap-3 w-full">
-              <input
-                type="checkbox"
-                className=""
-              />
-              <div className="text-[0.875rem] text-dark-gray items-center">
-                You consent to us using the data you have provided according to our <span className="text-[#045BB0]">Terms and Conditions</span>
-              </div>
+            <BiSquare className={`${term === false ? '' : 'hidden'} text-2xl`} onClick={() => setTerm(true)}/>
+            <BiCheckSquare className={`${term === true ? '' : 'hidden'} text-[#045BB0] text-2xl`} onClick={() => setTerm(false)}/>
+            <div className="text-[0.875rem] text-dark-gray items-center">
+              You consent to us using the data you have provided according to our <span className="text-[#045BB0]">Terms and Conditions</span>
             </div>
+          </div>
 
           <div className='flex flex-col w-full items-center'>
-            <div className='bg-[#045BB0] py-3 px-10 text-white font-semibold rounded-lg'>SUBMIT</div>
+            <div onClick={handleSubmit} className='bg-[#045BB0] py-3 px-10 text-white font-semibold rounded-lg cursor-pointer'>
+              {!isSubmitting ? 'SUBMIT' : 'Submitting ....'}
+            </div>
           </div>
         </div>
 

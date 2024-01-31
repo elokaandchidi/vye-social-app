@@ -1,4 +1,4 @@
-import { FaCaretDown, FaChevronLeft } from "react-icons/fa6";
+import { FaChevronLeft } from "react-icons/fa6";
 import Footer from "../reuseables/footer";
 
 import icon from '../../assets/images/sad-icon.png';

@@ -11,6 +11,8 @@
 # production
 /build
 
+/vyesocialbackend
+
 # misc
 .DS_Store
 .env
