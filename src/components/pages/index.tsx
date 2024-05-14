@@ -1,14 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaCaretDown } from "react-icons/fa6";
 import { BsCloudUploadFill } from "react-icons/bs";
 import Footer from "../reuseables/footer";
-import { isMobile } from "react-device-detect";
-import { BiCheckSquare, BiRadioCircle, BiRadioCircleMarked, BiSquare } from "react-icons/bi";
+import { BiCheckSquare, BiRadioCircle, BiRadioCircleMarked, BiSquare, BiSolidSearch, BiSolidCalendar } from "react-icons/bi";
 
 import {client} from "../../utils/client";
+import {feedQuery, marketCommentCountQuery, marketQuery} from "../../utils/data";
 import { useAlert } from "../../utils/notification/alertcontext";
 import { EMAIL_REGEX } from "../../utils/regex";
-import { AgeGroupList, ProductList, StateList } from "../../utils/common";
+import { AgeGroupList, ProductList, StateList, formatDate, getFormattedDate, getGreeting } from "../../utils/common";
 
 import icon from '../../assets/images/success-icon.png';
 
@@ -38,12 +38,39 @@ interface InfoDocument {
   };
 }
 
-const Home = () => {
+interface pinInfo{
+  _id: string;
+  title: string;
+  category: string;
+  description: string;
+  _createdAt: string;
+  commentCount: number;
+  comments: any;
+}
+
+interface marketInfo{
+  _id: string;
+  currencyName: string;
+  currencySymbol: string;
+  sellPrice: string;
+  buyPrice: string;
+  _createdAt: string;
+}
+
+interface MenuProps {
+  handlePin: (newValue: string) => void;
+  handleMarketComment: (newValue: boolean) => void;
+}
+
+const Home = ({handlePin, handleMarketComment} : MenuProps) => {
   const { addAlert } = useAlert();
   const [showProductDropdown, setShowProductDropdown] = useState(false);
   const [showAgeGroupDropdown, setShowAgeGroupDropdown] = useState(false);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const [fileName, setFileName] = useState('');
+  const [pins, setPins] = useState<pinInfo[]>([]);
+  const [marketCommentCount, setMarketCommentCount] = useState(0);
+  const [markets, setMarkets] = useState<marketInfo[]>([]);
   const [term, setTerm] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,7 +88,6 @@ const Home = () => {
     setFileName(selectedFile.name) 
     setFormInfo({...formInfo, file: selectedFile});
   };
-
 
   const handleDragOver = (event: any) => {
     event.preventDefault();
@@ -153,18 +179,136 @@ const Home = () => {
       addAlert({ message:'error occurred while submitting form', type: 'error' });
     }
   };
+
+  const handleSelectedPin = (pin: string) => { 
+    handlePin(pin);
+  };
+
+  const handleMarketPin = (value: boolean) => { 
+    handleMarketComment(value);
+  };
   
+  useEffect(() => {
+    if (pins.length === 0) {
+      client.fetch(feedQuery)
+      .then((data) => {
+        setPins(data);
+      })
+    }
+  })
+  
+  useEffect(() => {
+    if (pins.length === 0) {
+      client.fetch(feedQuery)
+      .then((data) => {
+        setPins(data);
+      })
+    }
+  })
+  
+  useEffect(() => {
+    if (markets.length === 0) {
+      let query = marketQuery();
+
+      if(query) {
+        client.fetch(query)
+        .then((data) => {
+          setMarkets(data);
+        })
+      }
+
+      client.fetch(marketCommentCountQuery)
+      .then((data) => {        
+        setMarketCommentCount(data);
+      })
+    }
+  })
 
   return (
-    <div className='flex flex-col w-full lg:items-center h-full overflow-auto lg:text-[1.5rem] text-[1rem] transaction-height duration-75 ease-out'>
-      {!isSuccess ? (
-        <div className='flex flex-col md:p-10 p-5 lg:w-1/3 lg:mb-0 mb-20'>
-
-          <div className={`${isMobile ? '' : 'hidden'} text-[1rem] text-center font-semibold`}>
-            Voice Your Experience is all about unblocking insights, shaping policies and empowering Nigeria’s future!
+    <div className='flex flex-col w-full gap-5 lg:items-center h-full overflow-auto lg:text-[1.5rem] text-[1rem] transaction-height duration-75 ease-out'>
+      <div className='flex flex-col gap-2 w-full bg-[#f7f7f7] lg:px-16 p-16'>
+        <div className='font-semibold text-2xl'>
+          {getGreeting()}
+        </div>
+        <div className='text-lg'>Welcome to today's voice</div>
+        <div className='flex flex-col items-center mt-10 w-full'>
+          <div className='border border-black p-5 rounded-lg bg-white w-4/5 flex flex-row items-center'>
+            <input type='text' placeholder='Search Vye social for data on anything and everything' className='text-lg text-black w-full' />
+            <BiSolidSearch/>
           </div>
-          <div className="w-full text-center lg:text-lg text-[.8rem] lg:font-semibold">
-            Please complete the form below
+        </div>
+      </div>
+      <div className='flex flex-row justify-between gap-2 w-full lg:px-16 p-5'>
+        <div className='flex flex-row gap-3 items-center'>
+          <BiSolidCalendar/>
+          <div className='openSans-font text-lg'>{getFormattedDate()}</div>
+          <FaCaretDown className='cursor-pointer'/>
+        </div>
+        <div className='flex flex-row gap-3 items-center'>
+          <div className=''>🇳🇬</div>
+          <div className='openSans-font text-lg'>Nigeria</div>
+          <FaCaretDown className='cursor-pointer'/>
+        </div>
+      </div>
+      <div className='flex flex-col w-full lg:px-16 p-5'>
+        <div className='flex flex-col w-full border border-gray-200 gap-5 rounded-xl p-5'>
+          <div className='flex flex-row justify-between text-gray-700 text-lg w-full'>
+            <div className=''>Exchange rate at</div>
+            <div className='flex flex-row gap-10 w-1/6'>
+              <div className='w-1/2'>Buy</div>
+              <div className=''>Sell</div>
+            </div>
+          </div>
+          {markets?.map((market) =>
+            <div key={market._id} className='flex flex-row items-center justify-between mt-3 text-gray-700 text-lg w-full'>
+              <div className='flex flex-row items-center gap-3 font-semibold text-black'>
+                <div className='bg-black h-8 w-8 flex flex-col justify-center items-center rounded-full text-sm text-white'>{market.currencySymbol}</div>
+                <div className='text-[1.6rem]'>{market.currencyName}</div>
+              </div>
+              <div className='flex flex-row gap-10 w-1/6'>
+                <div className='w-1/2'>{market.buyPrice}</div>
+                <div className=''>{market.sellPrice}</div>
+              </div>
+            </div>
+          
+          )}
+          <div className='flex flex-row items-center justify-between mt-3 text-gray-700 text-lg w-full'>
+            <div className='bg-[#f7f7f7] rounded-full px-4 py-1 text-sm text-black'>
+              Exchange rate
+            </div>
+            <div onClick={()=> handleMarketPin(true)} className="flex flex-row bg-comment bg-no-repeat bg-cover items-center justify-center cursor-pointer h-9 w-9 text-sm text-white font-semibold">
+              <div className=''>{marketCommentCount}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className='flex flex-col w-full lg:px-16 p-5'>
+        <div className='grid grid-cols-3 gap-5 w-full'>
+        {pins?.map((pin) => 
+            <div onClick={()=> handleSelectedPin(pin._id)} key={pin._id} className='flex flex-col items-center w-full border border-gray-200 gap-5 rounded-xl p-5 cursor-pointer'>
+              <div className='mt-5 text-[3rem] font-semibold'>{pin.title}</div>
+              <div className='text-lg text-gray-700'>
+                {pin.description} as at <span className='font-semibold'>{formatDate(pin?._createdAt)}</span>
+              </div>
+              <div className='flex flex-row items-center justify-between text-gray-700 text-lg w-full'>
+                <div className='bg-[#f7f7f7] rounded-full px-4 py-1 text-sm text-black'>
+                  {pin.category}
+                </div>
+                <div className="flex flex-row bg-comment bg-no-repeat bg-cover items-center justify-center h-9 w-9 text-sm text-white font-semibold">
+                  <div className=''>{pin.commentCount === null ? 0 : pin.commentCount}</div>
+                </div>
+              </div>
+            </div>
+        )}
+        </div>
+      </div>
+      {!isSuccess ? (
+        <div className='flex flex-col lg:px-16 p-12 lg:w-2/3 lg:mb-0 mb-20'>
+          <div className="w-full text-2xl lg:font-semibold">
+            April’s survey: [Survey name]
+          </div>
+          <div className="w-full mt-2 text-gray-700 lg:text-lg text-[.8rem]">
+            Your voice matters! Join the conversation by filling the form below.
           </div>
 
           <div className='flex flex-col mt-10 gap-5'>
@@ -176,7 +320,7 @@ const Home = () => {
               </div>
               <div className={`${showProductDropdown ? '' : 'hidden' } flex mt-[5rem] text-[.9rem] z-30 h-[10rem] overflow-auto bg-white rounded-b-lg absolute shadow-lg w-full text-blue flex-col`}>
                 {ProductList?.map((product, index) => 
-                  <div key={index} onClick={() =>[setFormInfo({ ...formInfo, product: product }), setShowProductDropdown(!showProductDropdown)]} className='flex flex-row hover:bg-[#045BB0] hover:text-white capitalize py-2 px-3 cursor-pointer'>
+                  <div key={index} onClick={() =>[setFormInfo({ ...formInfo, product: product }), setShowProductDropdown(!showProductDropdown)]} className='flex flex-row hover:bg-black hover:text-white capitalize py-2 px-3 cursor-pointer'>
                     {product}
                   </div>
                 )}
@@ -202,7 +346,7 @@ const Home = () => {
               </div>
               <div className={`${showLocationDropdown ? '' : 'hidden' } flex mt-[5rem] text-[.9rem] z-30 h-[10rem] overflow-auto bg-white rounded-b-lg absolute shadow-lg w-full text-blue flex-col`}>
                 {StateList?.map((state, index) => 
-                  <div key={index} onClick={() =>[setFormInfo({ ...formInfo, location: state }), setShowLocationDropdown(!showLocationDropdown)]} className='flex flex-row hover:bg-[#045BB0] hover:text-white capitalize py-2 px-3 cursor-pointer'>
+                  <div key={index} onClick={() =>[setFormInfo({ ...formInfo, location: state }), setShowLocationDropdown(!showLocationDropdown)]} className='flex flex-row hover:bg-black hover:text-white capitalize py-2 px-3 cursor-pointer'>
                     {state}
                   </div>
                 )}
@@ -231,7 +375,7 @@ const Home = () => {
               </div>
               <div className={`${showAgeGroupDropdown ? '' : 'hidden' } flex mt-[5rem] text-[.9rem] z-30 bg-white rounded-b-lg absolute shadow-lg w-full text-blue flex-col`}>
                 {AgeGroupList?.map((age, index) => 
-                  <div key={index} onClick={() =>[setFormInfo({ ...formInfo, agegroup: age }), setShowAgeGroupDropdown(!showAgeGroupDropdown)]} className='flex flex-row hover:bg-[#045BB0] hover:text-white capitalize py-2 px-3 cursor-pointer'>
+                  <div key={index} onClick={() =>[setFormInfo({ ...formInfo, agegroup: age }), setShowAgeGroupDropdown(!showAgeGroupDropdown)]} className='flex flex-row hover:bg-black hover:text-white capitalize py-2 px-3 cursor-pointer'>
                     {age}
                   </div>
                 )}
@@ -275,11 +419,11 @@ const Home = () => {
                   {fileName ? (
                     <div className='text-[1rem]'>{fileName}</div>
                   ) : (
-                    <BsCloudUploadFill className="text-[#045BB0] text-[1.5rem]"/>
+                    <BsCloudUploadFill className="text-black text-[1.5rem]"/>
                   )}
 
                   <label htmlFor="fileInput" className="cursor-pointer text-[.9rem]">
-                    Drop your file here or <span className="text-[#045BB0]">click here</span> to upload
+                    Drop your file here or <span className="font-semibold">click here</span> to upload
                   </label>
                   <span className='text-[.6rem]'>File should be PNG, JPEG, JPG, PDF, DOC (max 2MB)</span>
                   <input
@@ -305,14 +449,14 @@ const Home = () => {
 
             <div className="flex flex-row items-center gap-3 w-full">
               <BiSquare className={`${term === false ? '' : 'hidden'} text-2xl`} onClick={() => setTerm(true)}/>
-              <BiCheckSquare className={`${term === true ? '' : 'hidden'} text-[#045BB0] text-2xl`} onClick={() => setTerm(false)}/>
+              <BiCheckSquare className={`${term === true ? '' : 'hidden'} font-semibold text-2xl`} onClick={() => setTerm(false)}/>
               <div className="text-[0.875rem] text-dark-gray items-center">
-                You consent to us using the data you have provided according to our <span className="text-[#045BB0]">Terms and Conditions</span>
+                You consent to us using the data you have provided according to our <span className="font-semibold">Terms and Conditions</span>
               </div>
             </div>
 
-            <div className='flex flex-col w-full items-center'>
-              <div onClick={handleSubmit} className='bg-[#045BB0] py-3 px-10 text-white font-semibold rounded-lg cursor-pointer'>
+            <div className='flex flex-col mt-5 w-full items-center'>
+              <div onClick={handleSubmit} className='bg-black py-2 px-16 text-lg text-white font-semibold rounded-lg cursor-pointer'>
                 {!isSubmitting ? 'SUBMIT' : 'Submitting ....'}
               </div>
             </div>
@@ -330,7 +474,7 @@ const Home = () => {
           </div>
 
           <div className='flex flex-col w-full items-center'>
-            <div onClick={() => setIsSuccess(false)} className='bg-[#045BB0] cursor-pointer py-3 px-10 flex flex-row gap-3 items-center text-white font-semibold rounded-lg'>
+            <div onClick={() => setIsSuccess(false)} className='bg-black cursor-pointer py-3 px-10 flex flex-row gap-3 items-center text-white font-semibold rounded-lg'>
               Close
             </div>
           </div>

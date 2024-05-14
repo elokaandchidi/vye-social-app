@@ -30,6 +30,11 @@ code {
   /* background: rgb(2,2,89); */
 }
 
+.bg-comment {
+  background-image: url('./assets/images/comment.svg');
+  /* background: rgb(2,2,89); */
+}
+
 html{
   scroll-behavior: smooth;
 }

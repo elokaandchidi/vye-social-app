@@ -97,3 +97,55 @@ export const StateList = [
     "Yobe",
     "Zamfara"
 ]
+
+export const getGreeting = () =>{
+  const date = new Date();
+  const hour = date.getHours();
+
+  if (hour < 12) {
+    return "Good morning 😊";
+  } else if (hour >= 12 && hour < 17) {
+    return "Good afternoon 🌞";
+  } else {
+    return "Good evening 🌜";
+  }
+}
+
+export const formatDate = (dateString: string) =>{
+  const date = new Date(dateString);
+  
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Months are zero-based
+  const year = date.getUTCFullYear();
+
+  return `${day}/${month}/${year}`;
+}
+
+export const getFormattedDate = () =>{
+  const date = new Date();
+  const day = date.getDate();
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  const month = monthNames[date.getMonth()];
+  const year = date.getFullYear();
+
+  const daySuffix = getDaySuffix(day);
+
+  return `Today ${month} ${day}${daySuffix}, ${year}`;
+}
+
+export const getFirstCharacters = (str: string) => {
+  return str.split(' ').map((word: string) => word.charAt(0)).join('');
+};
+
+const getDaySuffix = (day: number) =>{
+  if (day > 3 && day < 21) return "th";
+  switch (day % 10) {
+    case 1: return "st";
+    case 2: return "nd";
+    case 3: return "rd";
+    default: return "th";
+  }
+}
