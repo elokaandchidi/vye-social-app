@@ -116,9 +116,9 @@ const IndexRoutes = () => {
             {getGreeting()}
           </div>
           <div className='text-lg'>Welcome to today's voice</div>
-          <div className='flex flex-col items-center lg:mt-10 mt-5 w-1/2'>
+          <div className='flex flex-col items-center lg:mt-10 mt-5 lg:w-1/2 w-4/5'>
             <div className='lg:p-5 p-3 rounded-lg bg-white lg:w-4/5 w-full flex flex-row items-center justify-between'>
-              <input type='text' placeholder='Search Vye social for data on anything and everything' className='lg:text-lg text-sm text-black placeholder:text-black w-11/12 ' />
+              <input type='text' placeholder='Search Vye social for data on anything and everything' className='lg:text-lg text-sm text-black placeholder:text-black w-11/12 focus:outline-none' />
               <BiSolidSearch className='text-[#2985e0] text-2xl'/>
             </div>
           </div>
