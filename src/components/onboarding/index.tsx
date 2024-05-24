@@ -5,7 +5,7 @@ const Splash = () => {
   
   return (
     <div className='flex justify-center items-center bg-white flex-col h-screen'>
-      <img src={logo} alt='logo' className='w-40'/>
+      <div className='text-[#2985e0] text-[2rem] font-bold'>vYe</div>
     </div>
   )
 }
