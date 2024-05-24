@@ -1,30 +1,27 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { GoogleOAuthProvider } from '@react-oauth/google';
+// import { GoogleOAuthProvider } from '@react-oauth/google';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { store } from './app/store';
 import App from './App';
 import * as serviceWorker from "./serviceWorker";
 
-import { config } from './utils/config';
 
 import './index.css';
 
 const container = document.getElementById('root')!;
 const root = createRoot(container!);
 
-const googleClientId = config.google?.token || 'your-default-client-id'; // Provide a default or fallback client ID
+// const googleClientId = config.google?.token || 'your-default-client-id'; // Provide a default or fallback client ID
 
 root.render(
   <React.StrictMode>
-    <GoogleOAuthProvider clientId={googleClientId}>
-      <Provider store={store}>
-        <Router>
-          <App />
-        </Router>
-      </Provider>
-    </GoogleOAuthProvider>
+    <Provider store={store}>
+      <Router>
+        <App />
+      </Router>
+    </Provider>
   </React.StrictMode>
 );
 

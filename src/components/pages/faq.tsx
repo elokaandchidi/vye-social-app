@@ -17,7 +17,7 @@ const Faq = () => {
           Homepage
         </NavLink>
         <div className='w-full'>
-          <div className='font-semibold lg:text-2xl text-sm'>
+          <div className='font-semibold lg:text-2xl text-lg'>
           Frequently Asked Questions
           </div>
           <div className='text-gray-500 md:text-[1rem] text-[.8rem]'>
@@ -26,7 +26,7 @@ const Faq = () => {
         </div>
         <div className={`${isMobile ? 'flex-col' : 'flex-row'} flex gap-10 items-start w-full`}>
           <div className={`${isMobile ? 'w-full' : 'w-3/5'} flex flex-col gap-3`}>
-            <div className='font-semibold lg:text-2xl text-sm text-[#045BB0]'>
+            <div className='font-semibold lg:text-2xl text-lg text-[#045BB0]'>
               General
             </div>
             <div className='flex flex-col gap-5 w-full'>
@@ -80,18 +80,18 @@ const Faq = () => {
           </div>
           <div className={`${isMobile ? 'w-full' : 'w-2/5'}`}>
             <div className='rounded-lg flex flex-col gap-3 p-5 bg-[#2985E0] bg-opacity-10'>
-              <div className='font-semibold lg:text-2xl text-sm'>
+              <div className='font-semibold lg:text-2xl text-lg'>
                 Get in touch
               </div>
-              <div className='text-gray-700 md:text-[1.1rem] text-[.8rem]'>
+              <div className='text-gray-700 md:text-[1.1rem] text-[.975rem]'>
                 We invite you to join us on this transformative journey. Whether you're a government entity seeking informed policy advice or an investor scouting for strategic opportunities, let's collaborate and drive positive change together.
               </div>
               <div className='flex flex-row items-center text-gray-700 md:gap-2 gap-1 w-full'>
-                <FaSquareEnvelope className='lg:text-2xl text-sm text-black' />
+                <FaSquareEnvelope className='lg:text-2xl text-lg text-black' />
                 <div className='lg:text-sm text-[.8rem]'>support@vye.socials.com</div>
               </div>
               <div className='flex flex-row items-center text-gray-700 md:gap-2 gap-1 w-full'>
-                <FaSquarePhone className='lg:text-2xl text-sm text-black' />
+                <FaSquarePhone className='lg:text-2xl text-lg text-black' />
                 <div className='lg:text-sm text-[.8rem]'>+44 0123 4567 89</div>
               </div>
             </div>

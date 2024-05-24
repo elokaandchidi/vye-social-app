@@ -140,6 +140,45 @@ export const getFirstCharacters = (str: string) => {
   return str.split(' ').map((word: string) => word.charAt(0)).join('');
 };
 
+export const getTimeAgo = (timestamp: string): string => {
+  const currentTime = new Date();
+  const pastTime = new Date(timestamp);
+  const timeDifference = currentTime.getTime() - pastTime.getTime();
+
+  const millisecondsPerMinute = 60 * 1000;
+  const millisecondsPerHour = millisecondsPerMinute * 60;
+  const millisecondsPerDay = millisecondsPerHour * 24;
+
+  if (timeDifference < millisecondsPerMinute) {
+    const seconds = Math.round(timeDifference / 1000);
+    return `${seconds} seconds ago`;
+  } else if (timeDifference < millisecondsPerHour) {
+    const minutes = Math.round(timeDifference / millisecondsPerMinute);
+    return `${minutes} minutes ago`;
+  } else if (timeDifference < millisecondsPerDay) {
+    const hours = Math.round(timeDifference / millisecondsPerHour);
+    return `${hours} hours ago`;
+  } else {
+    const days = Math.round(timeDifference / millisecondsPerDay);
+    return `${days} days ago`;
+  }
+}
+
+export const getRandomLightColor = () =>{
+  // Generate random values for R, G, and B, biased towards lighter colors (200-255)
+  const r = Math.floor(Math.random() * 56) + 200;
+  const g = Math.floor(Math.random() * 56) + 200;
+  const b = Math.floor(Math.random() * 56) + 200;
+
+  // Convert the RGB values to hexadecimal
+  const toHex = (value: any) => {
+    const hex = value.toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  };
+
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
 const getDaySuffix = (day: number) =>{
   if (day > 3 && day < 21) return "th";
   switch (day % 10) {

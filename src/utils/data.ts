@@ -5,37 +5,50 @@ export const feedDetailQuery = (pinId: string) => {
     category,
     description,
     _createdAt,
-    "commentCount": count(comments),
-    comments[]{
+    "comments": *[_type == "comment" && pin._ref == "${pinId}" && references(^._id)] | order(postedAt desc) {
+      _id,
+      "key": _id,
+      name,
       comment,
-      _createdAt,
-      _key,
-      postedBy->{
+      postedAt,
+      likes,
+      dislikes,
+      "replies": *[_type == "comment" && _id in ^.replies[]._ref] | order(postedAt desc) {
         _id,
-        userName,
-        image
-      },
+        name,
+        comment,
+        postedAt,
+        likes,
+        dislikes
+      }
     }
   }`;
   return query;
 };
-
-export const feedQuery =  `*[_type == "pin"] | order(_createdAt desc) {
-  _id,
-  title,
-  category,
-  description,
-  _createdAt,
-  "commentCount": count(comments),
-  comments[]{
-    comment,
-    _key,
-    postedBy->{
+export const feedQuery = `
+  *[_type == "pin"]{
+    _id,
+    title,
+    category,
+    description,
+    _createdAt,
+    "comments": *[_type == "comment" && pin._ref == ^._id] | order(postedAt desc) {
       _id,
-      userName,
-      image
+      "key": _id,
+      name,
+      comment,
+      postedAt,
+      likes,
+      dislikes,
+      "replies": *[_type == "comment" && _id in ^.replies[]._ref] | order(postedAt desc) {
+        _id,
+        name,
+        comment,
+        postedAt,
+        likes,
+        dislikes
+      },
     },
-  }
 }`;
 
 
@@ -54,22 +67,27 @@ export const marketQuery = () => {
     _id,
     currencyName,
     currencySymbol,
-    sellPrice,
-    buyPrice
+    price,
   }`;
   
   return query;
 };
 
-export const marketCommentCountQuery = `count(*[_type == 'marketComment'])`
+export const marketCommentCountQuery = `count(*[_type == 'marketComment' && isReply == false])`
 
-export const marketCommentQuery =  `*[_type == "marketComment"] | order(_createdAt desc) {
+export const marketCommentQuery =  `*[_type == "marketComment" && isReply == false] | order(postedAt desc) {
   _id,
+  name,
   comment,
-  _key,
-  postedBy->{
+  postedAt,
+  likes,
+  dislikes,
+  "replies": *[_type == "marketComment" && _id in ^.replies[]._ref] | order(postedAt desc) {
     _id,
-    userName,
-    image
+    name,
+    comment,
+    postedAt,
+    likes,
+    dislikes
   },
 }`;

@@ -1,4 +1,5 @@
-import { BiMenuAltLeft, BiQuestionMark } from 'react-icons/bi';
+import { BiMenuAltLeft } from 'react-icons/bi';
+import { BsPersonFill } from 'react-icons/bs';
 import { NavLink, useLocation } from 'react-router-dom';
 
 
@@ -20,7 +21,7 @@ const Sidebar = ({handleMenuSidebar } : MenuProps) => {
 
 
   return (
-    <div className='flex flex-col text-[0.9rem] lg:text-[1.3rem] justify-between min-w-310 hide-scrollbar'>
+    <div className='flex flex-col text-[0.9rem] lg:text-[1.3rem] justify-between hide-scrollbar'>
       <div className='flex flex-col pt-3'>
         <NavLink 
           to='/about'
@@ -33,14 +34,14 @@ const Sidebar = ({handleMenuSidebar } : MenuProps) => {
           About
         </NavLink>
         <NavLink 
-          to='/faqs'
-          className={pathname === '/faqs' ? isActiveClass : isNotActiveClass}
+          to='/team'
+          className={pathname === '/team' ? isActiveClass : isNotActiveClass}
           onClick={handleCloseSidebar}
         >
-          <div className={`${pathname === '/faqs' ? 'bg-[#2985E0]' : 'bg-black'}  rounded-sm`}>
-            <BiQuestionMark className='text-white' />
+          <div className={`${pathname === '/team' ? 'bg-[#2985E0]' : 'bg-black'}  rounded-sm`}>
+            <BsPersonFill className='text-white' />
           </div>
-          FAQs
+          Team
         </NavLink>
       </div>
     </div>
