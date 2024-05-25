@@ -4,8 +4,10 @@ import { FaCircle, FaWindowClose } from "react-icons/fa";
 import { BsCloudUploadFill } from "react-icons/bs";
 import { BiCheckSquare, BiRadioCircle, BiRadioCircleMarked, BiSquare, BiSolidCalendar } from "react-icons/bi";
 
+import Pagination from "../reuseables/pagination";
+
 import {client} from "../../utils/client";
-import {feedDetailQuery, feedQuery, marketCommentCountQuery, marketCommentQuery, marketQuery} from "../../utils/data";
+import {feedDetailQuery, feedQuery, feedSearchQuery, marketCommentCountQuery, marketCommentQuery, marketQuery} from "../../utils/data";
 import { useAlert } from "../../utils/notification/alertcontext";
 import { EMAIL_REGEX } from "../../utils/regex";
 import { AgeGroupList, ProductList, StateList, formatDate, getFirstCharacters, getFormattedDate, getRandomLightColor, getTimeAgo} from "../../utils/common";
@@ -71,18 +73,19 @@ interface commentInfo{
 }
 
 interface MenuProps {
-  // handlePin: (newValue: string) => void;
-  // handleMarketComment: (newValue: boolean) => void;
   isMinimize: boolean;
+  searchTerm: string;
 }
 
-const Home = ({isMinimize} : MenuProps) => {
+const Home = ({isMinimize, searchTerm} : MenuProps) => {
   const { addAlert } = useAlert();
   const [name, setName] = useState('');
   const [replyAs, setReplyAs] = useState('');
   const [term, setTerm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSearch, setIsSearch] = useState(false);
   const [comment, setComment] = useState('');
+  const [totalPage, setTotalPage] = useState(0);
   const [replyComment, setReplyComment] = useState('');
   const [fileName, setFileName] = useState('');
   const [selectedPin, setSelectedPin] = useState('');
@@ -93,12 +96,13 @@ const Home = ({isMinimize} : MenuProps) => {
   const [markets, setMarkets] = useState<marketInfo[]>([]);
   const [marketCommentCount, setMarketCommentCount] = useState(0);
   const [pinDetail, setPinDetail] = useState<pinInfo>({} as pinInfo);
-
+  
   const [marketComments, setMarketComments] = useState<commentInfo[]>([]);
   const [viewMarketComment, setViewMarketComment] = useState(false);
   const [showProductDropdown, setShowProductDropdown] = useState(false);
   const [showAgeGroupDropdown, setShowAgeGroupDropdown] = useState(false);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [searchParams, setSearchParams] = useState({ page: 1, pageSize: 10, searchTerm: ''});
   const [formInfo, setFormInfo] = useState({price: '', product: '', agegroup: '', gender: '', email: '', mobile: '', location:'', file: null, addtionalInfo:''});
   
   const handleFileChange = (event: any) => {
@@ -210,6 +214,7 @@ const Home = ({isMinimize} : MenuProps) => {
     setIsLoading(false);
     setPinDetail({} as pinInfo)
   };
+
   const handleCloseModal = () => {
     setViewMarketComment(false)
     setIsLoading(false);
@@ -473,15 +478,61 @@ const Home = ({isMinimize} : MenuProps) => {
       setIsLoading(false);
     })
   }
+
+  const fetchPinsBySearch = () =>{
+    setIsLoading(true);
+    setIsSearch(false);
+    setSearchParams({...searchParams, searchTerm: searchTerm});
+    const query = feedSearchQuery(searchParams);
+    
+    client.fetch(query)
+    .then((data) => {
+      setPins(data);
+      setIsLoading(false);
+    })
+  }
+
+  const onPageChange = (page: number) => {
+    setSearchParams({...searchParams, page: page});
+    fetchPinsBySearch();
+  }
+
+  const onPageSizeChange = (pageSize: number) => {
+    setSearchParams({...searchParams, pageSize: pageSize});
+    fetchPinsBySearch();
+  }
   
   useEffect(() => {
     if (pins.length === 0) {
-      client.fetch(feedQuery)
+      client.fetch(feedQuery(searchParams))
       .then((data) => {
         setPins(data);
       })
     }
   }, [ isLoading]);
+
+  useEffect(() => {
+    setIsLoading(true);
+    setIsSearch(true);    
+    
+    if(searchTerm !== '' && isSearch){
+      fetchPinsBySearch();
+    }else {
+      client.fetch(feedQuery(searchParams))
+      .then((data) => {
+        setPins(data);
+      })
+    }
+
+    const countQuery = `count(*[_type == "pin"])`
+
+    client.fetch(countQuery)
+    .then((data : number) => {
+      setTotalPage(Math.ceil(data / searchParams.pageSize));
+    })
+
+    // eslint-disable-next-line
+  }, [searchParams, searchTerm]);
   
   useEffect(() => {
     if (markets.length === 0) {
@@ -869,6 +920,7 @@ const Home = ({isMinimize} : MenuProps) => {
             </div>
           )}
         </div>
+        <Pagination currentPage={searchParams.page} dataLength={pins.length} pageSize={searchParams.pageSize} totalPages={totalPage} onPageSizeChange={onPageSizeChange} onPageChange={onPageChange} />
       </div>
       {!isSuccess ? (
         <div className='flex flex-col lg:px-16 lg:p-12 lg:w-2/3'>
