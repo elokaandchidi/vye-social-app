@@ -568,7 +568,7 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
     <div className={`${isMinimize ? 'w-3/4' : 'w-full'} flex flex-col gap-5 lg:items-center h-full overflow-auto lg:text-[1.5rem] text-[1rem] lg:px-20 p-5 transaction-height duration-75 ease-out`}>
       <div className={`${!selectedPin && pinDetail?.title === undefined ? 'hidden' : ''} flex flex-col items-end fixed w-full z-50 top-0 right-0 bg-gray-100 bg-opacity-40 gap-10 h-screen`}>
         {!isLoading ?
-          <div className={`${isMobile ? 'w-5/6' : 'w-1/4'} flex flex-col p-10 bg-white overflow-auto h-full`}>
+          <div className={`${isMobile ? 'w-5/6' : 'w-1/4'} flex flex-col p-10 bg-white overflow-auto h-full pb-[4rem]`}>
             <div className='w-full flex flex-row items-start justify-between text-[1.5rem] text-black font-semibold'>
               <div className='w-5/6 text-[1.4rem] leading-tight text-black font-semibold'>
                 {pinDetail?.title} {pinDetail?.description} as at <span className='font-semibold'>{formatDate(pinDetail?._createdAt)}</span>
@@ -718,7 +718,7 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
 
       <div className={`${!viewMarketComment ? 'hidden' : ''} flex flex-col items-end fixed w-full top-0 right-0 z-50 bg-gray-100 bg-opacity-40 gap-10 h-screen`}>
       {!isLoading ?
-        <div className={`${isMobile ? 'w-5/6' : 'w-1/4'} flex flex-col p-10 bg-white overflow-auto h-full`}>
+        <div className={`${isMobile ? 'w-5/6' : 'w-1/4'} flex flex-col p-10 bg-white overflow-auto pb-[4rem] h-full`}>
           <div className='w-full flex flex-row items-start justify-end text-[1.5rem] text-black font-semibold'>
             <FaWindowClose onClick={() => handleCloseModal()} className='cursor-pointer text-[#2985e0]'/>
           </div>
