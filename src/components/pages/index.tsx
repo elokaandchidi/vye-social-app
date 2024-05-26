@@ -628,7 +628,7 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
                   <div className='flex flex-col w-full text-sm'>
                     <div className='flex flex-row gap-3 items-center w-full'>
                       <div className='capitalize text-[#2985e0] font-semibold'>{comment.name}</div>
-                      <div className="text-xs text-gray-500 flex flex-row items-center gap-1">
+                      <div className="text-[.69rem] text-gray-500 flex flex-row items-center gap-1">
                           <FaCircle className="text-[.4rem]" /> {getTimeAgo(comment.postedAt)}
                       </div>
                     </div>
@@ -642,8 +642,8 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
                         <AiFillDislike className='cursor-pointer' onClick={() => handleDislike(comment._id)}/>
                         <div className={`${comment.dislikes === 0 ? 'hidden' : ''}`}>{comment.dislikes}</div>
                       </div>
-                      <div className='flex flex-row gap-1 items-center'>
-                        <AiFillMessage className='cursor-pointer' onClick={() => setSelectedComment(comment._id === selectedComment ? '' : comment._id)}/>
+                      <div onClick={() => setSelectedComment(comment._id === selectedComment ? '' : comment._id)} className='flex flex-row gap-1 items-center cursor-pointer'>
+                        <AiFillMessage className=''/>
                         <div className='text-xs'>Reply</div>
                       </div>
                     </div>
@@ -674,19 +674,19 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
                     {comment.replies && comment.replies.length > 0 && (
                       <div className="ml-4 mt-2">
                         {comment.replies.map((reply: any) => (
-                          <div key={reply._id} className='flex flex-row items-start text-black gap-4 border-b pb-3'>
+                          <div key={reply._id} className='flex flex-row items-start text-black gap-4 border-b py-3'>
                             <div style={{ backgroundColor: getRandomLightColor() }} className={`flex flex-col items-center justify-center w-12 h-10 text-black text-[.7rem] rounded-full uppercase`}>
                               {getFirstCharacters(reply.name)}
                             </div>
                             <div className='flex flex-col w-full text-sm'>
                               <div className='flex flex-row gap-3 items-center w-full'>
                                 <div className='capitalize text-[#2985e0] font-semibold'>{reply.name}</div>
-                                <div className="text-xs text-gray-500 flex flex-row items-center gap-1">
+                                <div className="text-[.69rem] text-gray-500 flex flex-row items-center gap-1">
                                     <FaCircle className="text-[.4rem]" /> {getTimeAgo(reply.postedAt)}
                                 </div>
                               </div>
                               <div className='text-gray-700'>{reply?.comment}</div>
-                              <div className='flex flex-row gap-2 py-3 items-center'>
+                              <div className='flex flex-row gap-2 pt-3 items-center'>
                                 <div className='flex flex-row gap-1 items-center'>
                                   <AiFillLike onClick={() => handleLike(reply._id)}  className='text-[#2985e0] cursor-pointer'/>
                                   <div className={`${reply.likes === 0 ? 'hidden' : ''}`}>{reply.likes}</div>
@@ -775,7 +775,7 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
                 <div className='flex flex-col w-full text-sm'>
                   <div className='flex flex-row gap-3 items-center w-full'>
                     <div className='capitalize text-[#2985e0] font-semibold'>{comment.name}</div>
-                    <div className="text-xs text-gray-500 flex flex-row items-center gap-1">
+                    <div className="text-[.69rem] text-gray-500 flex flex-row items-center gap-1">
                         <FaCircle className="text-[.4rem]" /> {getTimeAgo(comment.postedAt)}
                     </div>
                   </div>
@@ -789,8 +789,8 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
                       <AiFillDislike className='cursor-pointer' onClick={() => handleDislike(comment._id)}/>
                       <div className={`${comment.dislikes === 0 ? 'hidden' : ''}`}>{comment.dislikes}</div>
                     </div>
-                    <div className='flex flex-row gap-1 items-center'>
-                      <AiFillMessage className='cursor-pointer' onClick={() => setSelectedComment(comment._id === selectedComment ? '' : comment._id)}/>
+                    <div onClick={() => setSelectedComment(comment._id === selectedComment ? '' : comment._id)} className='flex flex-row gap-1 items-center cursor-pointer'>
+                      <AiFillMessage className=''/>
                       <div className='text-xs'>Reply</div>
                     </div>
                   </div>
@@ -828,7 +828,7 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
                           <div className='flex flex-col w-full text-sm'>
                             <div className='flex flex-row gap-3 items-center w-full'>
                               <div className='capitalize text-[#2985e0] font-semibold'>{reply.name}</div>
-                              <div className="text-xs text-gray-500 flex flex-row items-center gap-1">
+                              <div className="text-[.69rem] text-gray-500 flex flex-row items-center gap-1">
                                   <FaCircle className="text-[.4rem]" /> {getTimeAgo(reply.postedAt)}
                               </div>
                             </div>
