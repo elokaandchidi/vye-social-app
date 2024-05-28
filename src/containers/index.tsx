@@ -62,7 +62,7 @@ const IndexRoutes = () => {
   return (
     <div className={`flex-col fixed flex w-full overflow-auto h-screen bg-white`}>
       <div className={`${pathname === '/' ? 'bg-navbar bg-cover bg-no-repeat' : 'bg-[#2985e0]'} ${isMobile ? 'bg-white' : ''} flex flex-col w-full`}>
-        <div className={`${isMobile ? '' : 'hidden'} flex flex-row items-center p-5 justify-between border-b`}>
+        <div className={`${isMobile ? '' : 'hidden'} flex flex-row items-center px-5 py-2 justify-between border-b`}>
           <NavLink className={`${pathname === '/' ? 'text-white' : 'text-[#2985E0]'} text-[1.6rem] font-semibold`} to='/'>
             vYe
           </NavLink>
@@ -91,7 +91,7 @@ const IndexRoutes = () => {
             {getGreeting()}
           </div>
           <div className='text-lg'>Welcome to today's voice</div>
-          <div className='flex flex-col items-center lg:mt-10 mt-5 lg:w-1/2 w-4/5'>
+          <div className='flex flex-col items-center lg:mt-10 mt-3 lg:w-1/2 w-4/5'>
             <div className='lg:p-5 p-3 rounded-lg bg-white lg:w-4/5 w-full flex flex-row items-center justify-between'>
               <input  value={searchTerm} onChange={({ target}) => {setSearchTerm( target.value )}}
               type='text' placeholder='Search Vye social for data on anything and everything' className='lg:text-lg text-sm text-black placeholder:text-black w-11/12 focus:outline-none' />

@@ -565,7 +565,7 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
   }, [viewMarketComment]);
 
   return (
-    <div className={`${isMinimize ? 'w-3/4' : 'w-full'} flex flex-col gap-5 lg:items-center h-full overflow-auto lg:text-[1.5rem] text-[1rem] lg:px-20 p-5 transaction-height duration-75 ease-out`}>
+    <div className={`${isMinimize ? 'w-3/4' : 'w-full'} flex flex-col gap-5 lg:items-center h-full overflow-auto lg:text-[1.5rem] text-[1rem] lg:px-20 px-5 transaction-height duration-75 ease-out`}>
       <div className={`${!selectedPin && pinDetail?.title === undefined ? 'hidden' : ''} flex flex-col items-end fixed w-full z-50 top-0 right-0 bg-gray-100 bg-opacity-40 gap-10 h-screen`}>
         {!isLoading ?
           <div className={`${isMobile ? 'w-5/6' : 'w-1/4'} flex flex-col p-10 bg-white overflow-auto h-full pb-[4rem]`}>
@@ -865,11 +865,11 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
       </div>
       
       <div className='flex flex-col w-full lg:mt-10 mt-2'>
-        <div className='lg:mt-5 lg:text-[1.5rem] text-lg font-semibold'>{mainPin.title}</div>
-        <div className='flex flex-col justify-between items-center w-full border lg:mt-10 mt-5 border-gray-200 gap-10 rounded-xl p-5 cursor-pointer'>
+        <div className='lg:mt-5 mt-1 lg:text-[1.5rem] text-[1rem] font-semibold'>{mainPin.title}</div>
+        <div className='flex flex-col justify-between items-center w-full border lg:mt-10 mt-5 border-gray-200 lg:gap-10 gap-3 rounded-xl p-5 cursor-pointer'>
           <div className="flex flex-col gap-5 items-center w-full">
-            <div className='text-[4rem] font-semibold'>{mainPin.count}</div>
-            <div className='text-lg text-gray-700 w-full text-start '>
+            <div className='lg:text-[4rem] text-[2rem] font-semibold'>{mainPin.count}</div>
+            <div className='lg:text-lg text-sm text-gray-700 w-full text-start '>
               {mainPin.description} as at <span className='font-semibold'>{formatDate(mainPin?.postedAt)}</span>
             </div>
 
