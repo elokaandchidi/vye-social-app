@@ -864,9 +864,9 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
 
       </div>
       
-      <div className='flex flex-col w-full lg:mt-10 mt-5'>
-        <div className='mt-5 text-[1.5rem] font-semibold'>{mainPin.title}</div>
-        <div className='flex flex-col justify-between items-center w-full border mt-10 border-gray-200 gap-10 rounded-xl p-5 cursor-pointer'>
+      <div className='flex flex-col w-full lg:mt-10 mt-2'>
+        <div className='lg:mt-5 lg:text-[1.5rem] text-lg font-semibold'>{mainPin.title}</div>
+        <div className='flex flex-col justify-between items-center w-full border lg:mt-10 mt-5 border-gray-200 gap-10 rounded-xl p-5 cursor-pointer'>
           <div className="flex flex-col gap-5 items-center w-full">
             <div className='text-[4rem] font-semibold'>{mainPin.count}</div>
             <div className='text-lg text-gray-700 w-full text-start '>
