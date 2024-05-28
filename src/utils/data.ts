@@ -4,10 +4,42 @@ type searchParams = {
   searchTerm?: string,
 }
 
+export const mainFeedQuery = () => {
+  const query = `*[_type == "pin" && isMain == true]{
+    _id,
+    title,
+    count,
+    postedAt,
+    category,
+    description,
+    _createdAt,
+    "comments": *[_type == "comment" && pin._ref == ^._id] | order(postedAt desc) {
+      _id,
+      "key": _id,
+      name,
+      comment,
+      postedAt,
+      likes,
+      dislikes,
+      "replies": *[_type == "comment" && _id in ^.replies[]._ref] | order(postedAt desc) {
+        _id,
+        name,
+        comment,
+        postedAt,
+        likes,
+        dislikes
+      }
+    }
+  }`;
+  return query;
+};
+
 export const feedDetailQuery = (pinId: string) => {
   const query = `*[_type == "pin" && _id == '${pinId}']{
     _id,
     title,
+    count,
+    postedAt,
     category,
     description,
     _createdAt,
@@ -36,10 +68,12 @@ export const feedQuery = ({page, pageSize}: searchParams) => {
   const prev = (page - 1) * pageSize;
   const next = page * pageSize;
   
-  const query = `*[_type == "pin"] | order(_createdAt desc) [${prev}...${next}]{
+  const query = `*[_type == "pin" && isMain == false] | order(_createdAt desc) [${prev}...${next}]{
     _id,
     title,
     category,
+    count,
+    postedAt,
     description,
     _createdAt,
     "comments": *[_type == "comment" && pin._ref == ^._id] | order(postedAt desc) {
@@ -99,7 +133,7 @@ export const newsQuery = () => {
   const query = `*[_type == "post" && status == 'active'] | order(_createdAt desc){
     _id,
     title,
-    body
+    link
   }`;
   
   return query;

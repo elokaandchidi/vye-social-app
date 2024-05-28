@@ -4,11 +4,9 @@ import { Routes, Route, useLocation, NavLink } from 'react-router-dom';
 import { BiMenu, BiSolidSearch } from "react-icons/bi";
 import { FaCircleMinus, FaCirclePlus } from 'react-icons/fa6';
 import {isMobile} from 'react-device-detect';
-import BlockContent from '@sanity/block-content-to-react';
 
 import Footer from '../components/reuseables/footer';
 import Sidebar from '../components/reuseables/sidebar';
-import Onboarding from '../components/onboarding/index'
 import {Home, About, Faq, Term, Team, NotFound} from '../components/pages/_route';
 
 import { client } from '../utils/client';
@@ -25,15 +23,13 @@ import minimizeIcon from '../assets/images/minimize.svg';
 interface newInfo{
   _id: string;
   title: string;
-  body: Object;
+  link: string;
 }
 
 const IndexRoutes = () => {
   const location = useLocation();
-  const [loading, setLoading] = useState(true)
   const [isMinimize, setIsMinimize] = useState(false)
   const [selectedFaqToView, setSelectedFaqToView] = useState(1)
-  const [selectedNewToView, setSelectedNewToView] = useState('')
   const [toggleSidebar, setToggleSidebar] = useState(false);
   const [newsList, setNewsList] = useState<newInfo[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -56,34 +52,12 @@ const IndexRoutes = () => {
       })
     }
   }
-
-  const serializers = {
-    types: {
-      code: (props: any) => (
-        <pre data-language={props?.node.language}>
-          <code>{props?.node.code}</code>
-        </pre>
-      ),
-    },
-  }
-  
   useEffect(() => {
     if (newsList.length === 0) {
       fetchNews()
     }
   }, [newsList])
 
-  useEffect(() => {
-    if (loading) {
-      setTimeout(() => {
-        setLoading(false)
-      }, 5000);
-    }
-  }, [loading])
-
-  if (loading) {
-    return <Onboarding/>
-  }
   
   return (
     <div className={`flex-col fixed flex w-full overflow-auto h-screen bg-white`}>
@@ -165,21 +139,14 @@ const IndexRoutes = () => {
               <div className='flex flex-row items-center text-lg mt-10 gap-3'>
                 <img src={newsIcon} alt='icon' className='h-6'/>
                 <div className='font-semibold'>
-                   News & Updates
+                  Data News
                 </div>
               </div>
-              <div className='flex flex-col gap-5 w-full'>
+              <div className='flex flex-col gap-5 mt-3 w-full'>
                 {newsList?.map((news, index) =>
-                  <div key={index} className='flex flex-col rounded-xl gap-4 p-3'>
-                    <div className='flex flex-row items-center justify-between w-full'>
-                      <div className='w-full font-semibold'>{news.title}</div>
-                    </div>
-                    <div className={`${selectedNewToView === news._id ? '' : 'line-clamp-3'} text-sm w-5/6 text-gray-700`}>
-                      <BlockContent blocks={news?.body} serializers={serializers} />
-                    </div>
-                    <div onClick={() => setSelectedNewToView(news._id)} className={`${selectedNewToView === news._id ? 'hidden' : ''} cursor-pointer text-gray-700 font-semibold`}>READ MORE HERE</div>
-                    <div onClick={() => setSelectedNewToView('')} className={`${selectedNewToView !== news._id ? 'hidden' : ''} cursor-pointer text-gray-700 font-semibold`}>READ LESS HERE</div>
-                  </div>
+                  <a href={news?.link} target='_blank' rel="noreferrer" key={index} className='flex flex-row items-center hover:text-[#2985e0] hover:font-bold justify-between w-full'>
+                    <div className='w-full font-medium text-sm'>{news.title}</div>
+                  </a>
                 )}
               </div>
               <div className='flex flex-row items-center text-lg mt-10 gap-3'>

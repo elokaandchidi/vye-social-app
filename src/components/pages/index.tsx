@@ -2,18 +2,17 @@ import { useEffect, useState } from "react";
 import { FaCaretDown} from "react-icons/fa6";
 import { FaCircle, FaWindowClose } from "react-icons/fa";
 import { BsCloudUploadFill } from "react-icons/bs";
-import { BiCheckSquare, BiRadioCircle, BiRadioCircleMarked, BiSquare, BiSolidCalendar } from "react-icons/bi";
+import { BiCheckSquare, BiRadioCircle, BiRadioCircleMarked, BiSquare } from "react-icons/bi";
 
 import Pagination from "../reuseables/pagination";
 
 import {client} from "../../utils/client";
-import {feedDetailQuery, feedQuery, feedSearchQuery, marketCommentCountQuery, marketCommentQuery, marketQuery} from "../../utils/data";
+import {feedDetailQuery, feedQuery, feedSearchQuery, mainFeedQuery, marketCommentCountQuery, marketCommentQuery, marketQuery} from "../../utils/data";
 import { useAlert } from "../../utils/notification/alertcontext";
 import { EMAIL_REGEX } from "../../utils/regex";
-import { AgeGroupList, ProductList, StateList, formatDate, getFirstCharacters, getFormattedDate, getRandomLightColor, getTimeAgo} from "../../utils/common";
+import { AgeGroupList, ProductList, StateList, formatDate, getFirstCharacters, getRandomLightColor, getTimeAgo} from "../../utils/common";
 
 import icon from '../../assets/images/success-icon.png';
-import nigeriaIcon from '../../assets/images/nigeria.svg';
 import { isMobile } from "react-device-detect";
 import { AiFillDislike, AiFillLike, AiFillMessage } from "react-icons/ai";
 
@@ -46,6 +45,8 @@ interface InfoDocument {
 interface pinInfo{
   _id: string;
   title: string;
+  count: string;
+  postedAt: string;
   category: string;
   description: string;
   _createdAt: string;
@@ -90,6 +91,7 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
   const [fileName, setFileName] = useState('');
   const [selectedPin, setSelectedPin] = useState('');
   const [selectedComment, setSelectedComment] = useState('');
+  const [mainPin, setMainPin] = useState<pinInfo>({} as pinInfo);
   const [pins, setPins] = useState<pinInfo[]>([]);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -263,7 +265,6 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
       setComment('');
       setTerm(false);
       
-      setIsLoading(true);
       setTimeout(() => {
         fetchPinDetails();
       }, 60000);
@@ -311,7 +312,6 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
       setComment('');
       setTerm(false);
       
-      setIsLoading(true);
       setTimeout(() => {
         fetchMarketComments();
       }, 60000);
@@ -328,7 +328,6 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
 
     addAlert({ message: 'Comment Liked successfully', type: 'success' }); // Show success message
 
-    setIsLoading(true);
     setTimeout(() => {
       viewMarketComment ? fetchMarketComments() :fetchPinDetails();
     }, 70000);
@@ -338,7 +337,6 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
     await client.patch(id).inc({ dislikes: 1 }).commit();
     addAlert({ message: 'Comment DisLiked successfully', type: 'success' }); // Show success message
 
-    setIsLoading(true);
     setTimeout(() => {
       viewMarketComment ? fetchMarketComments() :fetchPinDetails();
     }, 70000);
@@ -390,7 +388,6 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
       setReplyComment('');
       setSelectedComment('');
       
-      setIsLoading(true);
       setTimeout(() => {
         fetchPinDetails();
       }, 60000);
@@ -447,7 +444,6 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
       setReplyComment('');
       setSelectedComment('');
       
-      setIsLoading(true);
       setTimeout(() => {
         fetchMarketComments();
       }, 60000);
@@ -507,6 +503,10 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
       client.fetch(feedQuery(searchParams))
       .then((data) => {
         setPins(data);
+      })
+      client.fetch(mainFeedQuery())
+      .then((data) => {
+        setMainPin(data[0]);
       })
     }
   }, [ isLoading]);
@@ -571,7 +571,7 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
           <div className={`${isMobile ? 'w-5/6' : 'w-1/4'} flex flex-col p-10 bg-white overflow-auto h-full`}>
             <div className='w-full flex flex-row items-start justify-between text-[1.5rem] text-black font-semibold'>
               <div className='w-5/6 text-[1.4rem] leading-tight text-black font-semibold'>
-                {pinDetail?.title} {pinDetail?.description} as at <span className='font-semibold'>{formatDate(pinDetail?._createdAt)}</span>
+                {pinDetail?.count} {pinDetail?.description} as at <span className='font-semibold'>{formatDate(pinDetail?._createdAt)}</span>
               </div>
               <FaWindowClose onClick={() => handleClosePinModal()} className='cursor-pointer text-[#2985e0]'/>
             </div>
@@ -863,24 +863,30 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
       }
 
       </div>
-
-      <div className='flex flex-row justify-between gap-2 w-full mt-10'>
-        <div className='flex flex-row gap-3 items-center'>
-          <BiSolidCalendar className='text-[#2985E0]'/>
-          <div className='openSans-font lg:text-lg text-sm'>{getFormattedDate()}</div>
-          <FaCaretDown className='cursor-pointer'/>
-        </div>
-        <div className='flex flex-row gap-3 items-center'>
-          <img src={nigeriaIcon} />
-          <div className='openSans-font lg:text-lg text-sm'>Nigeria</div>
-          <FaCaretDown className='cursor-pointer'/>
-        </div>
-      </div>
       
-      <div className='flex flex-col w-full'>
-        <div className={`${isMobile ? 'grid-cols-1 gap-10' :'grid-cols-3 gap-5'} grid w-full`}>
+      <div className='flex flex-col w-full lg:mt-10 mt-5'>
+        <div className='mt-5 text-[1.5rem] font-semibold'>{mainPin.title}</div>
+        <div className='flex flex-col justify-between items-center w-full border mt-10 border-gray-200 gap-10 rounded-xl p-5 cursor-pointer'>
+          <div className="flex flex-col gap-5 items-center w-full">
+            <div className='text-[4rem] font-semibold'>{mainPin.count}</div>
+            <div className='text-lg text-gray-700 w-full text-start '>
+              {mainPin.description} as at <span className='font-semibold'>{formatDate(mainPin?.postedAt)}</span>
+            </div>
+
+          </div>
+          <div className='flex flex-row items-center justify-between text-gray-700 text-lg w-full'>
+            <div className='bg-[#f7f7f7] rounded-full px-4 py-1 text-sm text-black'>
+              {mainPin.category}
+            </div>
+            <div onClick={()=> handlePin(mainPin._id)} className="flex flex-row bg-comment bg-no-repeat bg-cover items-center justify-center h-9 w-9 text-sm text-white font-semibold">
+              <div className=''>{mainPin.comments?.length}</div>
+            </div>
+          </div>
+        </div>
+        <div className={`${isMobile ? 'grid-cols-1 gap-10' :'grid-cols-3 gap-5'} mt-10 grid w-full`}>
           <div className='flex flex-col justify-between w-full relative border border-gray-200 gap-5 rounded-xl p-5'>
             <div className="flex flex-col gap-3 w-full">
+              <div className='mt-5 mb-2 text-lg text-center font-semibold'>Exchange rate</div>
               {markets?.map((market) =>
                 <div key={market._id} className='flex flex-row items-center justify-between text-gray-700 lg:text-lg text-sm w-full'>
                   <div className='flex flex-row items-center gap-3 font-semibold text-black'>
@@ -903,9 +909,10 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
           {pins?.map((pin) => 
             <div key={pin._id} className='flex flex-col justify-between items-center w-full border border-gray-200 gap-5 rounded-xl p-5 cursor-pointer'>
               <div className="flex flex-col gap-3 items-center w-full">
-                <div className='mt-5 text-[3rem] font-semibold'>{pin.title}</div>
+                <div className='mt-5 text-lg font-semibold'>{pin.title}</div>
+                <div className='text-[3rem] font-semibold'>{pin.count}</div>
                 <div className='text-lg text-gray-700'>
-                  {pin.description} as at <span className='font-semibold'>{formatDate(pin?._createdAt)}</span>
+                  {pin.description} as at <span className='font-semibold'>{formatDate(pin?.postedAt)}</span>
                 </div>
 
               </div>
