@@ -24,14 +24,14 @@ const Team = () => {
               <div className='font-semibold text-lg'>Eloka</div>
               <img src={ImageEamon} alt='logo' className='object-cover h-[20rem] grayscale' />
               <div className='text-black text-center md:text-[1.1rem] text-[.975rem] w-full'>
-                Interim CEO/Chief Product Officier
+                Interim CEO/Chief Product Officer
               </div>
             </div>
             <div className='flex flex-col gap-5'>
               <div className='font-semibold text-lg'>Chidi</div>
               <img src={ImageChidi} alt='logo' className='object-cover h-[20rem] grayscale' />
               <div className='text-black text-center md:text-[1.1rem] text-[.975rem] w-full'>
-                Chief Data Officier
+                Chief Data Officer
               </div>
             </div>
             
