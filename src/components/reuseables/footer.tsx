@@ -10,12 +10,7 @@ const Footer = () => {
       <NavLink className='text-[#2985E0] font-semibold text-[2rem]' to='/'>
         vYe
       </NavLink>
-      <div className='flex flex-row items-center text-[#045BB0] gap-5'>
-        <FaSquareFacebook className='text-2xl' />
-        <FaSquareInstagram className='text-2xl' />
-        <FaSquareXTwitter className='text-2xl' />
-      </div>
-      <div className='text-[#045BB0]'>Designed and Developed by ECTC LTD</div>
+      <a target='_blank' rel="noreferrer" href='https://www.ectc.ltd/'  className='text-[#045BB0] underline'>Designed and Developed by ECTC LTD</a>
     </div>
   )
 }

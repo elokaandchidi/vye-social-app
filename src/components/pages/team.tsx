@@ -4,7 +4,6 @@ import { NavLink } from "react-router-dom";
 
 import ImageEamon from '../../assets/images/eamon.jpg';
 import ImageChidi from '../../assets/images/chidi.jpg';
-import ImageEddy from '../../assets/images/eddy.jpg';
 
 const Team = () => {
   
@@ -20,32 +19,22 @@ const Team = () => {
           <div className='font-semibold lg:text-2xl text-lg'>
             Meet the team
           </div>
-          <div className='text-gray-500 md:text-[1.1rem] text-[.975rem] w-full'>
-            Lorem ipsum dolor sit amet consectetur. Cursus tortor vitae posuere eget potenti elementum elit urna nulla. Amet neque placerat sociis nisl. Ultrices sollicitudin facilisis tellus nibh gravida duis. 
-          </div>
           <div className='grid lg:grid-cols-3 w-full gap-5 mt-5'>
-            <div className='flex flex-col gap-5'>
-              <div className='font-semibold text-lg'>Chidi</div>
-              <img src={ImageChidi} alt='logo' className='object-cover h-[20rem] grayscale' />
-              <div className='text-black md:text-[1.1rem] text-[.975rem] w-full'>
-                Lorem ipsum dolor sit amet consectetur. Cursus tortor vitae posuere eget potenti elementum elit urna nulla. Amet neque placerat sociis nisl. Ultrices sollicitudin facilisis tellus nibh gravida duis. 
-              </div>
-            </div>
             <div className='flex flex-col gap-5'>
               <div className='font-semibold text-lg'>Eloka</div>
               <img src={ImageEamon} alt='logo' className='object-cover h-[20rem] grayscale' />
-              <div className='text-black md:text-[1.1rem] text-[.975rem] w-full'>
-                Lorem ipsum dolor sit amet consectetur. Cursus tortor vitae posuere eget potenti elementum elit urna nulla. Amet neque placerat sociis nisl. Ultrices sollicitudin facilisis tellus nibh gravida duis. 
+              <div className='text-black text-center md:text-[1.1rem] text-[.975rem] w-full'>
+                Interim CEO/Chief Product Officier
               </div>
             </div>
             <div className='flex flex-col gap-5'>
-              <div className='font-semibold text-lg'>Eddy</div>
-              <img src={ImageEddy} alt='logo' className='object-cover h-[20rem] grayscale' />
-              <div className='text-black md:text-[1.1rem] text-[.975rem] w-full'>
-                Lorem ipsum dolor sit amet consectetur. Cursus tortor vitae posuere eget potenti elementum elit urna nulla. Amet neque placerat sociis nisl. Ultrices sollicitudin facilisis tellus nibh gravida duis. 
+              <div className='font-semibold text-lg'>Chidi</div>
+              <img src={ImageChidi} alt='logo' className='object-cover h-[20rem] grayscale' />
+              <div className='text-black text-center md:text-[1.1rem] text-[.975rem] w-full'>
+                Chief Data Officier
               </div>
             </div>
-
+            
           </div>
         </div>
           

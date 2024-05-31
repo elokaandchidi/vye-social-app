@@ -9,6 +9,7 @@ export const mainFeedQuery = () => {
     _id,
     title,
     count,
+    source,
     postedAt,
     category,
     description,
@@ -73,6 +74,7 @@ export const feedQuery = ({page, pageSize}: searchParams) => {
     title,
     category,
     count,
+    source,
     postedAt,
     description,
     _createdAt,
@@ -105,6 +107,7 @@ export const feedSearchQuery = ({page, pageSize, searchTerm}: searchParams) => {
     _id,
     title,
     category,
+    source,
     description,
     _createdAt,
     "comments": *[_type == "comment" && pin._ref == ^._id] | order(postedAt desc) {
@@ -140,12 +143,11 @@ export const newsQuery = () => {
 };
 
 export const marketQuery = () => {    
-  const query = `*[_type == "market"] | order(_createdAt desc){
+  const query = `*[_type == "market"]{
     _id,
-    currencyName,
-    currencySymbol,
-    price,
-  }`;
+    source,
+    market,
+  }[0]`;
   
   return query;
 };

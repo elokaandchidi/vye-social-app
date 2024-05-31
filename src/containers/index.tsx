@@ -63,19 +63,21 @@ const IndexRoutes = () => {
     <div className={`flex-col fixed flex w-full overflow-auto h-screen bg-white`}>
       <div className={`${pathname === '/' ? 'bg-navbar bg-cover bg-no-repeat' : 'bg-[#2985e0]'} ${isMobile ? 'bg-white' : ''} flex flex-col w-full`}>
         <div className={`${isMobile ? '' : 'hidden'} flex flex-row items-center px-5 py-2 justify-between border-b`}>
-          <NavLink className={`${pathname === '/' ? 'text-white' : 'text-[#2985E0]'} text-[1.6rem] font-semibold`} to='/'>
-            vYe
+          <NavLink className={`${pathname === '/' ? 'text-white' : 'text-[#2985E0]'}`} to='/'>
+            <div className='text-[1.6rem] font-semibold'>vYe</div>
+            <div className='text-[.5rem] font-thin italic'>your one-stop shop for Nigera's social and political data</div>
           </NavLink>
           <div className={`${pathname === '/' ? '' : 'bg-[#2985E0]'} rounded-sm`}>
             <BiMenu onClick={() => setToggleSidebar(true)} className='text-white' />
           </div>
         </div>
         <div className={`${isMobile ? 'hidden' : ''} flex flex-row p-5 lg:px-20 border-b-2 w-full items-center justify-between`}>
-          <NavLink className='text-white text-[1.6rem] font-semibold' to='/'>
-            vYe
+          <NavLink className='text-white' to='/'>
+            <div className='text-[1.6rem] font-semibold'>vYe</div>
+            <div className='text-[.5rem] font-thin italic'>your one-stop shop for Nigera's social and political data</div>
           </NavLink>
-          <div className='flex flex-row w-full text-lg justify-end gap-3 text-white'>
-            <NavLink to='/' className={`${(pathname === '/') ? '' : ''} p-5  font-semibold`}>
+          <div className='flex flex-row text-lg justify-end gap-3 text-white'>
+            <NavLink to='/#Survey' className={`${(pathname === '/') ? '' : ''} p-5  font-semibold`}>
               Survey
             </NavLink>
             <NavLink to='/about' className={`${(pathname === '/about') ? '' : ''} p-5  font-semibold`}>
@@ -90,7 +92,6 @@ const IndexRoutes = () => {
           <div className='font-semibold text-3xl'>
             {getGreeting()}
           </div>
-          <div className='text-lg'>Welcome to today's voice</div>
           <div className='flex flex-col items-center lg:mt-10 mt-3 lg:w-1/2 w-4/5'>
             <div className='lg:p-5 p-3 rounded-lg bg-white lg:w-4/5 w-full flex flex-row items-center justify-between'>
               <input  value={searchTerm} onChange={({ target}) => {setSearchTerm( target.value )}}
@@ -133,7 +134,7 @@ const IndexRoutes = () => {
             <div className={`${isMinimize && !isMobile ? 'hidden' : ''}`}>
               <div className={`${isMobile ? 'hidden' : ''} w-1/2 text-black font-semibold`}>
                 <span className='text-[1.5rem] pr-2'>Voice Your Experience</span>
-                is all <br/> about unblocking insights, shaping policies and empowering Nigeria’s future!
+                is all about unblocking insights, shaping policies and empowering Nigeria’s future!
               </div>
 
               <div className='flex flex-row items-center text-lg mt-10 gap-3'>

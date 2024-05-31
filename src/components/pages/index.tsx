@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { FaCaretDown} from "react-icons/fa6";
+import { NavLink } from 'react-router-dom';
 import { FaCircle, FaWindowClose } from "react-icons/fa";
 import { BsCloudUploadFill } from "react-icons/bs";
 import { BiCheckSquare, BiSquare } from "react-icons/bi";
@@ -19,6 +20,7 @@ import { AiFillDislike, AiFillLike, AiFillMessage } from "react-icons/ai";
 interface pinInfo{
   _id: string;
   title: string;
+  source: string;
   count: string;
   postedAt: string;
   category: string;
@@ -30,9 +32,8 @@ interface pinInfo{
 
 interface marketInfo{
   _id: string;
-  currencyName: string;
-  currencySymbol: string;
-  price: string;
+  source: string;
+  market: any;
   _createdAt: string;
 }
 
@@ -71,7 +72,7 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
   const [fileData, setFileData] = useState({} as any);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [markets, setMarkets] = useState<marketInfo[]>([]);
+  const [markets, setMarkets] = useState<marketInfo>({} as marketInfo);
   const [marketCommentCount, setMarketCommentCount] = useState(0);
   const [pinDetail, setPinDetail] = useState<pinInfo>({} as pinInfo);
   
@@ -572,7 +573,7 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
   }, [searchParams, searchTerm]);
   
   useEffect(() => {
-    if (markets.length === 0) {
+    if (!markets?._id ) {
       let query = marketQuery();
 
       if(query) {
@@ -588,6 +589,21 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
       })
     }
   })
+
+  const hash = window.location.hash.substring(1); // Get the hash part of the URL without the '#'
+
+  if (hash) {
+    const element = document.getElementById(hash);
+
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      console.warn(`Element with id ${hash} not found`);
+    }
+  } else {
+    console.warn('No hash found in URL');
+  }
+  
 
   useEffect(() => {
     if (selectedPin) {
@@ -608,7 +624,7 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
           <div className={`${isMobile ? 'w-5/6' : 'w-1/4'} flex flex-col p-10 bg-white overflow-auto h-full pb-[4rem]`}>
             <div className='w-full flex flex-row items-start justify-between text-[1.5rem] text-black font-semibold'>
               <div className='w-5/6 text-[1.4rem] leading-tight text-black font-semibold'>
-                {pinDetail?.count} {pinDetail?.description} as at <span className='font-semibold'>{formatDate(pinDetail?._createdAt)}</span>
+                {pinDetail?.count} {pinDetail?.description}
               </div>
               <FaWindowClose onClick={() => handleClosePinModal()} className='cursor-pointer text-[#2985e0]'/>
             </div>
@@ -903,28 +919,37 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
       
       <div className='flex flex-col w-full lg:mt-10 mt-2'>
         <div className='lg:mt-5 mt-1 lg:text-[1.5rem] text-[1rem] font-semibold'>{mainPin.title}</div>
-        <div className='flex flex-col justify-between items-center w-full border lg:mt-10 mt-5 border-gray-200 lg:gap-10 gap-3 rounded-xl p-5 cursor-pointer'>
+        <div className='flex flex-col justify-between items-center w-full border lg:mt-10 mt-5 border-gray-200 lg:gap-10 gap-5 rounded-xl p-5 cursor-pointer'>
           <div className="flex flex-col gap-5 items-center w-full">
-            <div className='lg:text-[4rem] text-[2rem] font-semibold'>{mainPin.count}</div>
+            <div className='lg:text-[3rem] text-[1.5rem] font-semibold'>{mainPin.count}</div>
             <div className='lg:text-lg text-sm text-gray-700 w-full text-start '>
-              {mainPin.description} as at <span className='font-semibold'>{formatDate(mainPin?.postedAt)}</span>
+              {mainPin.description}
             </div>
-
           </div>
           <div className='flex flex-row items-center justify-between text-gray-700 text-lg w-full'>
-            <div className='bg-[#f7f7f7] rounded-full px-4 py-1 text-sm text-black'>
-              {mainPin.category}
+            <div className='flex flex-col'>
+              <div className='bg-[#f7f7f7] rounded-full px-4 py-1 text-sm text-black'>
+                {mainPin.category}
+              </div>
+              <div className='text-xs text-gray-400 pt-2'>{mainPin.source}</div>
             </div>
+            <NavLink to='/#Survey' className={`${isMobile? 'hidden' :''} p-5  underline font-medium`}>
+              Participate in our survey
+            </NavLink>
+
             <div onClick={()=> handlePin(mainPin._id)} className="flex flex-row bg-comment bg-no-repeat bg-cover items-center justify-center h-9 w-9 text-sm text-white font-semibold">
               <div className=''>{mainPin.comments?.length}</div>
             </div>
           </div>
+          <NavLink to='/#Survey' className={`${isMobile? '' :'hidden'} underline font-medium`}>
+            Participate in our survey
+          </NavLink>
         </div>
         <div className={`${isMobile ? 'grid-cols-1 gap-10' :'grid-cols-3 gap-5'} mt-10 grid w-full`}>
           <div className='flex flex-col justify-between w-full relative border border-gray-200 gap-5 rounded-xl p-5'>
             <div className="flex flex-col gap-3 w-full">
               <div className='mt-5 mb-2 text-lg text-center font-semibold'>Nigeria Exchange Rate - Today</div>
-              {markets?.map((market) =>
+              {markets.market?.fieldValues?.map((market: any) =>
                 <div key={market._id} className='flex flex-row items-center justify-between text-gray-700 lg:text-lg text-sm w-full'>
                   <div className='flex flex-row items-center gap-3 font-semibold text-black'>
                     <div className='bg-black h-8 w-8 flex flex-col justify-center items-center rounded-full text-sm text-white'>{market.currencySymbol}</div>
@@ -935,8 +960,11 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
               )}
             </div>
             <div className='flex flex-row items-center justify-between mt-3 text-gray-700 text-lg w-full'>
-              <div className='bg-[#f7f7f7] rounded-full px-4 py-1 text-sm text-black'>
-                Exchange rate
+              <div className='flex flex-col'>
+                <div className='bg-[#f7f7f7] rounded-full px-4 py-1 text-sm text-black'>
+                  Exchange rate
+                </div>
+                <div className='text-xs text-gray-400 pt-2'>{markets.source}</div>
               </div>
               <div onClick={()=> setViewMarketComment(true)} className="flex flex-row bg-comment bg-no-repeat bg-cover items-center justify-center cursor-pointer h-9 w-9 text-sm text-white font-semibold">
                 <div className=''>{marketCommentCount}</div>
@@ -949,13 +977,16 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
                 <div className='mt-5 text-lg font-semibold'>{pin.title}</div>
                 <div className='text-[3rem] font-semibold'>{pin.count}</div>
                 <div className='text-lg text-gray-700'>
-                  {pin.description} as at <span className='font-semibold'>{formatDate(pin?.postedAt)}</span>
+                  {pin.description}
                 </div>
 
               </div>
               <div className='flex flex-row items-center justify-between text-gray-700 text-lg w-full'>
-                <div className='bg-[#f7f7f7] rounded-full px-4 py-1 text-sm text-black'>
-                  {pin.category}
+                <div className='flex flex-col'>
+                  <div className='bg-[#f7f7f7] rounded-full px-4 py-1 text-sm text-black'>
+                    {pin.category}
+                  </div>
+                  <div className='text-xs text-gray-400 pt-2'>{pin.source}</div>
                 </div>
                 <div onClick={()=> handlePin(pin._id)} className="flex flex-row bg-comment bg-no-repeat bg-cover items-center justify-center h-9 w-9 text-sm text-white font-semibold">
                   <div className=''>{pin.comments.length}</div>
@@ -967,7 +998,7 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
         <Pagination currentPage={searchParams.page} dataLength={pins.length} pageSize={searchParams.pageSize} totalPages={totalPage} onPageSizeChange={onPageSizeChange} onPageChange={onPageChange} />
       </div>
       {!isSuccess ? (
-        <div className='flex flex-col lg:px-16 lg:p-12 mb-10 lg:w-2/3'>
+        <div id="Survey" className='flex flex-col lg:px-16 lg:p-12 mb-10 lg:w-2/3'>
           <div className="w-full text-2xl font-semibold">
             {surveyForm.title}
           </div>
@@ -976,8 +1007,7 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
           </div>
 
           
-          <form className='flex flex-col mt-10 gap-5' onSubmit={handleSubmit}>
-            {/* <h1>{surveyForm.title}</h1> */}
+          <form  className='flex flex-col mt-10 gap-5' onSubmit={handleSubmit}>
             {surveyForm.fields?.map((field: any) => (
               <div key={field.label} className='flex flex-col w-full'>
                 <label className='text-[.9rem] gap-3 pb-2'>{field.label}</label>

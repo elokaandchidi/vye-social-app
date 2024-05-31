@@ -72,7 +72,7 @@ const About = () => {
         </NavLink>
         <div className={`w-full flex flex-col gap-3`}>
           <div className='font-semibold lg:text-2xl text-lg'>
-            Welcome to VYE.socials
+            Welcome to vYe
           </div>
           <div className='text-gray-500 md:text-[1.1rem] text-[.975rem]'>
             At Vye.social, we're passionate about decoding the intricate web of consumer behaviors and market trends in Nigeria. Our mission is clear: to harness data-driven insights that shape policies and fuel strategic investments, propelling Nigeria's growth.
