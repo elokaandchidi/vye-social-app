@@ -11,7 +11,7 @@ import {client} from "../../utils/client";
 import {feedDetailQuery, feedQuery, feedSearchQuery, formQuery, mainFeedQuery, marketCommentCountQuery, marketCommentQuery, marketQuery} from "../../utils/data";
 import { useAlert } from "../../utils/notification/alertcontext";
 import { EMAIL_REGEX } from "../../utils/regex";
-import { formatDate, getFirstCharacters, getRandomLightColor, getTimeAgo} from "../../utils/common";
+import { getFirstCharacters, getRandomLightColor, getTimeAgo} from "../../utils/common";
 
 import icon from '../../assets/images/success-icon.png';
 import { isMobile } from "react-device-detect";
@@ -609,7 +609,7 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
     if (selectedPin) {
       fetchPinDetails();
     }
-  },);
+  },[selectedPin]);
 
   useEffect(() => {
     if (viewMarketComment) {
