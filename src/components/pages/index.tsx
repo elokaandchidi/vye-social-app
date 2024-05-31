@@ -2,45 +2,19 @@ import { useEffect, useState } from "react";
 import { FaCaretDown} from "react-icons/fa6";
 import { FaCircle, FaWindowClose } from "react-icons/fa";
 import { BsCloudUploadFill } from "react-icons/bs";
-import { BiCheckSquare, BiRadioCircle, BiRadioCircleMarked, BiSquare } from "react-icons/bi";
+import { BiCheckSquare, BiSquare } from "react-icons/bi";
 
 import Pagination from "../reuseables/pagination";
 
 import {client} from "../../utils/client";
-import {feedDetailQuery, feedQuery, feedSearchQuery, mainFeedQuery, marketCommentCountQuery, marketCommentQuery, marketQuery} from "../../utils/data";
+import {feedDetailQuery, feedQuery, feedSearchQuery, formQuery, mainFeedQuery, marketCommentCountQuery, marketCommentQuery, marketQuery} from "../../utils/data";
 import { useAlert } from "../../utils/notification/alertcontext";
 import { EMAIL_REGEX } from "../../utils/regex";
-import { AgeGroupList, ProductList, StateList, formatDate, getFirstCharacters, getRandomLightColor, getTimeAgo} from "../../utils/common";
+import { formatDate, getFirstCharacters, getRandomLightColor, getTimeAgo} from "../../utils/common";
 
 import icon from '../../assets/images/success-icon.png';
 import { isMobile } from "react-device-detect";
 import { AiFillDislike, AiFillLike, AiFillMessage } from "react-icons/ai";
-
-interface InfoDocument {
-  _type: string;
-  price: string;
-  product: string;
-  agegroup: string;
-  gender: string;
-  email: string;
-  mobile: string;
-  location: string;
-  addtionalInfo: string;
-  receiptImage?: {
-    _type: string;
-    asset: {
-      _type: string;
-      _ref: string;
-    };
-  };
-  receiptFile?: {
-    _type: string;
-    asset: {
-      _type: string;
-      _ref: string;
-    };
-  };
-}
 
 interface pinInfo{
   _id: string;
@@ -88,11 +62,13 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
   const [comment, setComment] = useState('');
   const [totalPage, setTotalPage] = useState(0);
   const [replyComment, setReplyComment] = useState('');
-  const [fileName, setFileName] = useState('');
   const [selectedPin, setSelectedPin] = useState('');
   const [selectedComment, setSelectedComment] = useState('');
   const [mainPin, setMainPin] = useState<pinInfo>({} as pinInfo);
   const [pins, setPins] = useState<pinInfo[]>([]);
+  const [surveyForm, setSurveyForm] = useState({} as any);
+  const [fileNames, setFileNames] = useState({} as any);
+  const [fileData, setFileData] = useState({} as any);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [markets, setMarkets] = useState<marketInfo[]>([]);
@@ -101,115 +77,162 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
   
   const [marketComments, setMarketComments] = useState<commentInfo[]>([]);
   const [viewMarketComment, setViewMarketComment] = useState(false);
-  const [showProductDropdown, setShowProductDropdown] = useState(false);
-  const [showAgeGroupDropdown, setShowAgeGroupDropdown] = useState(false);
-  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const [searchParams, setSearchParams] = useState({ page: 1, pageSize: 10, searchTerm: ''});
-  const [formInfo, setFormInfo] = useState({price: '', product: '', agegroup: '', gender: '', email: '', mobile: '', location:'', file: null, addtionalInfo:''});
-  
-  const handleFileChange = (event: any) => {
-    const selectedFile = event.target.files[0];
-    setFileName(selectedFile.name)    
-    setFormInfo({...formInfo, file: selectedFile});
+  const [formInfo, setFormInfo] = useState({} as any);
+
+  const handleChange = (e:any) => {
+    const { name, value } = e.target;
+    setFormInfo((prevState:any) => ({
+      ...prevState,
+      [name]: value,
+    }));
   };
 
-  const handleDrop = (event: any) => {
-    event.preventDefault();
-    const selectedFile = event.dataTransfer.files[0];
-    setFileName(selectedFile.name) 
-    setFormInfo({...formInfo, file: selectedFile});
+  const handleFileChange = (e:any, fieldLabel: string) => {
+    const { files } = e.target;
+    if (files && files[0]) {
+      setFileData({
+        ...fileData,
+        [fieldLabel]: files[0],
+      });
+      setFileNames({
+        ...fileNames,
+        [fieldLabel]: files[0].name,
+      });
+    }
   };
 
-  const handleDragOver = (event: any) => {
-    event.preventDefault();
+  const handleDragOver = (e:any) => {
+    e.preventDefault();
   };
-  
-  const handleSubmit = async () => {  
-    setIsSubmitting(true);
-    const { price, product, agegroup, gender, email, mobile, location, addtionalInfo, file } = formInfo;
-  
-    const requiredFields = [
-      { field: product, message: 'Please select product' },
-      { field: email, message: 'Please add email' },
-      { field: mobile, message: 'Please add mobile' },
-      { field: price, message: 'Please add price' },
-      { field: location, message: 'Please select location' },
-      { field: gender, message: 'Please select gender' },
-      { field: agegroup, message: 'Please select age group' }
-    ];
-  
-    for (const { field, message } of requiredFields) {
-      if (!field) {
-        setIsSubmitting(false);
-        return addAlert({ message, type: 'error' });
+
+  const handleDrop = (e:any, fieldLabel: string) => {
+    e.preventDefault();
+    const files = e.dataTransfer.files;
+    if (files && files[0]) {
+      setFileData({
+        ...fileData,
+        [fieldLabel]: files[0],
+      });
+      setFileNames({
+        ...fileNames,
+        [fieldLabel]: files[0].name,
+      });
+    }
+  };
+
+  const validateFile = (file: any) => {
+    const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    const maxSize = 2 * 1024 * 1024; // 2MB
+
+    if (!validTypes.includes(file.type)) {
+      return 'File type should be PNG, JPEG, or JPG';
+    }
+
+    if (file.size > maxSize) {
+      return 'File size should be less than 2MB';
+    }
+
+    return '';
+  };
+
+  const validate = () => {
+    const newErrors = {} as any;
+    surveyForm.fields.forEach((field: any) => {
+      if (field.isRequired) {
+        if (field.type === 'text' || field.type === 'textarea' || field.type === 'select' || field.type === 'date') {
+          if (!formInfo[field.label]) {
+            newErrors[field.label] = `${field.label} is required`;
+          }
+        } else if (field.type === 'image') {
+          if (!fileData[field.label]) {
+            newErrors[field.label] = `${field.label} is required`;
+          } else {
+            const file = fileData[field.label];
+            const error = validateFile(file);
+            if (error) {
+              newErrors[field.label] = error;
+            }
+          }
+        }else if (field.type === 'email') {
+          if (!formInfo[field.label]) {
+            newErrors[field.label] = `${field.label} is required`;
+          } else {
+            if(!EMAIL_REGEX.test(formInfo[field.label])) {
+              newErrors[field.label] = `Invalid ${field.label} provided`;
+            }
+          }
+        }
       }
-    }
+    });
+    return newErrors;
+  };
 
-    if(!EMAIL_REGEX.test(email)) {
-      setIsSubmitting(false);
-      return addAlert({ message:'Invalid email provided', type: 'error' });
-    }
-    
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
     if(!term) {
       setIsSubmitting(false);
       return addAlert({ message:'Please accept terms', type: 'error' });
     }
-  
-    let doc: InfoDocument = {
-      _type: 'info',
-      price,
-      product,
-      agegroup,
-      gender,
-      email,
-      mobile,
-      location,
-      addtionalInfo
-    };  
-    
-    if (file) {
-      const {type, name} = file
-      if (type === 'image/png' || type === 'image/jpg' || type === 'image/jpeg') {
-        const uploadedFile = await client.assets.upload('image', file, {contentType: type, filename: name});
-        doc = {
-          ...doc,
-          receiptImage: {
-            _type: 'image',
-            asset: {
-              _type: 'reference',
-              _ref: uploadedFile._id
-            }
-          }
-        };
-      } else {
-        const uploadedFile = await client.assets.upload('file', file);
-        doc = {
-          ...doc,
-          receiptFile: {
-            _type: 'file',
-            asset: {
-              _type: 'reference',
-              _ref: uploadedFile._id
-            }
-          }
-        };
+
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      // setErrors(validationErrors);
+      for (const key in validationErrors) {
+        if (validationErrors.hasOwnProperty(key)) {
+          addAlert({ message: `${validationErrors[key]}`, type: 'error' });
+        }
       }
+      setIsSubmitting(false);
+      return;
     }
+    
+
+    const fieldValues = await Promise.all(
+      Object.keys(formInfo).map(async (key) => {
+        const uniqueKey = `${key}-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+        if (fileData[key]) {
+          const file = fileData[key];
+          const fileAsset = await client.assets.upload('image', file);
+          return { _key: uniqueKey, key, value: fileAsset.url };
+        } else {
+          return { _key: uniqueKey, key, value: formInfo[key] };
+        }
+      })
+    );
+
+    const submissionData = {
+      _type: 'formSubmission',
+      formId: { _type: 'reference', _ref: surveyForm._id },
+      submittedAt: new Date().toISOString(),
+      data: {
+        fieldValues,
+      },
+    };
 
     try {
-      await client.create(doc)
-      setFormInfo({price: '', product: '', agegroup: '', gender: '', email: '', mobile: '', location:'', file: null, addtionalInfo:''})
-      setTerm(false)
-      setFileName('')
-      setIsSuccess(true)
+      await client.create(submissionData);
       setIsSubmitting(false);
       addAlert({ message: 'Form submitted successfully', type: 'success' });
+      // Reset form after submission
+      const initialData = surveyForm?.fields.reduce((acc: any, field:any) => {
+        acc[field.label] = '';
+        return acc;
+      }, {});
+      setFormInfo(initialData);
+      setFileData({} as any);
+      setFileNames({} as any);
+      setIsSuccess(true)
+      setTerm(false)
     } catch (error) {
-      console.log(error);
+      console.error('Error submitting form:', error);
       setIsSubmitting(false);
       addAlert({ message:'error occurred while submitting form', type: 'error' });
     }
   };
+  
 
   const handleClosePinModal = () => {
     setSelectedPin('');
@@ -509,7 +532,21 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
         setMainPin(data[0]);
       })
     }
-  }, [ isLoading]);
+  }, [ isLoading, pins, searchParams]);
+  
+  useEffect(() => {
+    if (!surveyForm?._id) {
+      client.fetch(formQuery)
+      .then((data) => {        
+        setSurveyForm(data);
+        const initialData = data.fields.reduce((acc: any, field:any) => {
+          acc[field.label] = '';
+          return acc;
+        }, {});
+        setFormInfo(initialData);
+      })
+    }
+  }, [ surveyForm]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -556,7 +593,7 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
     if (selectedPin) {
       fetchPinDetails();
     }
-  }, [selectedPin]);
+  },);
 
   useEffect(() => {
     if (viewMarketComment) {
@@ -886,7 +923,7 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
         <div className={`${isMobile ? 'grid-cols-1 gap-10' :'grid-cols-3 gap-5'} mt-10 grid w-full`}>
           <div className='flex flex-col justify-between w-full relative border border-gray-200 gap-5 rounded-xl p-5'>
             <div className="flex flex-col gap-3 w-full">
-              <div className='mt-5 mb-2 text-lg text-center font-semibold'>Exchange rate</div>
+              <div className='mt-5 mb-2 text-lg text-center font-semibold'>Nigeria Exchange Rate - Today</div>
               {markets?.map((market) =>
                 <div key={market._id} className='flex flex-row items-center justify-between text-gray-700 lg:text-lg text-sm w-full'>
                   <div className='flex flex-row items-center gap-3 font-semibold text-black'>
@@ -930,150 +967,98 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
         <Pagination currentPage={searchParams.page} dataLength={pins.length} pageSize={searchParams.pageSize} totalPages={totalPage} onPageSizeChange={onPageSizeChange} onPageChange={onPageChange} />
       </div>
       {!isSuccess ? (
-        <div className='flex flex-col lg:px-16 lg:p-12 lg:w-2/3'>
-          <div className="w-full text-2xl lg:font-semibold">
-            April’s survey: [Survey name]
+        <div className='flex flex-col lg:px-16 lg:p-12 mb-10 lg:w-2/3'>
+          <div className="w-full text-2xl font-semibold">
+            {surveyForm.title}
           </div>
           <div className="w-full mt-2 text-gray-700 lg:text-lg text-[.8rem]">
-            Your voice matters! Join the conversation by filling the form below.
+            {surveyForm.description}
           </div>
 
-          <div className='flex flex-col mt-10 gap-5'>
-            <div className="flex flex-col relative w-full">
-              <label className="text-[0.875rem] pb-2">Product or Service</label>
-              <div className='flex flex-row items-center p-3 border border-gray-500 rounded-lg justify-between w-full text-center'>
-                <input type='text' value={formInfo.product} placeholder="Select the product or service you purchased" readOnly className='w-full text-[.9rem] focus:outline-none'/>
-                <FaCaretDown onClick={()=> setShowProductDropdown(!showProductDropdown)} className='cursor-pointer'/>
-              </div>
-              <div className={`${showProductDropdown ? '' : 'hidden' } flex mt-[5rem] text-[.9rem] z-30 h-[10rem] overflow-auto bg-white rounded-b-lg absolute shadow-lg w-full text-blue flex-col`}>
-                {ProductList?.map((product, index) => 
-                  <div key={index} onClick={() =>[setFormInfo({ ...formInfo, product: product }), setShowProductDropdown(!showProductDropdown)]} className='flex flex-row hover:bg-black hover:text-white capitalize py-2 px-3 cursor-pointer'>
-                    {product}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className='flex flex-col w-full'>
-              <div className='text-[.9rem] gap-3'>
-                Price (in Naira ₦)
-              </div>
-              <input
-                type="number"
-                placeholder="Enter price of product or service here"
-                value={formInfo.price}
-                onChange={({ target}) => {setFormInfo({ ...formInfo, price: target.value })}}
-                className='w-full mt-3 text-[.9rem] border rounded-lg bg-transparent border-gray-500 p-3 focus:outline-none'
-              />
-            </div>
-            <div className="flex flex-col relative w-full">
-              <label className="text-[0.875rem] pb-2">Location</label>
-              <div className='flex flex-row items-center p-3 border border-gray-500 rounded-lg justify-between w-full text-center'>
-                <input type='text' placeholder="Select location" readOnly value={formInfo.location} className='w-full text-[.9rem] focus:outline-none'/>
-                <FaCaretDown onClick={()=> setShowLocationDropdown(!showLocationDropdown)} className='cursor-pointer'/>
-              </div>
-              <div className={`${showLocationDropdown ? '' : 'hidden' } flex mt-[5rem] text-[.9rem] z-30 h-[10rem] overflow-auto bg-white rounded-b-lg absolute shadow-lg w-full text-blue flex-col`}>
-                {StateList?.map((state, index) => 
-                  <div key={index} onClick={() =>[setFormInfo({ ...formInfo, location: state }), setShowLocationDropdown(!showLocationDropdown)]} className='flex flex-row hover:bg-black hover:text-white capitalize py-2 px-3 cursor-pointer'>
-                    {state}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="flex flex-col w-full items-start">
-              <label className="text-[0.875rem] pb-2">Gender</label>
-              <div className='flex flex-row text-[.9rem] items-center gap-3 justify-start'>
-                <div className='flex flex-row items-center gap-3 justify-start'>
-                  <BiRadioCircle className={`${(formInfo.gender === 'female' ) ? 'hidden' : ''} text-xl`} onClick={() => setFormInfo({ ...formInfo, gender: 'female' })} />
-                  <BiRadioCircleMarked className={`${formInfo.gender !== 'female' ? 'hidden' : ''} text-xl`}/>
-                  Female
-                </div>
-                <div className='flex flex-row items-center gap-3 justify-start'>
-                  <BiRadioCircle className={`${formInfo.gender === 'male' ? 'hidden' : ''} text-xl`} onClick={() => setFormInfo({ ...formInfo, gender: 'male' })} />
-                  <BiRadioCircleMarked className={`${formInfo.gender !== 'male' ? 'hidden' : ''} text-xl`}/>
-                  Male
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-col relative w-full">
-              <label className="text-[0.875rem] pb-2">Age</label>
-              <div className='flex flex-row items-center p-3 border border-gray-500 rounded-lg justify-between w-full text-center'>
-                <input type='text' placeholder="Select age group" value={formInfo.agegroup} readOnly className='w-full text-[.9rem] focus:outline-none'/>
-                <FaCaretDown onClick={()=> setShowAgeGroupDropdown(!showAgeGroupDropdown)} className='cursor-pointer'/>
-              </div>
-              <div className={`${showAgeGroupDropdown ? '' : 'hidden' } flex mt-[5rem] text-[.9rem] z-30 bg-white rounded-b-lg absolute shadow-lg w-full text-blue flex-col`}>
-                {AgeGroupList?.map((age, index) => 
-                  <div key={index} onClick={() =>[setFormInfo({ ...formInfo, agegroup: age }), setShowAgeGroupDropdown(!showAgeGroupDropdown)]} className='flex flex-row hover:bg-black hover:text-white capitalize py-2 px-3 cursor-pointer'>
-                    {age}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className='flex flex-col w-full'>
-              <div className='text-[.9rem] gap-3 pb-2'>
-                Email
-              </div>
-              <input
-                type="email"
-                placeholder="Enter your email address"
-                value={formInfo.email}
-                onChange={({ target}) => {setFormInfo({ ...formInfo, email: target.value })}}
-                className='w-full text-[.9rem] border rounded-lg bg-transparent border-gray-500 p-3 focus:outline-none'
-              />
-            </div>
-
-            <div className='flex flex-col w-full'>
-              <div className='text-[.9rem] gap-3 pb-2'>
-                Phone Number
-              </div>
-              <input
-                type="number"
-                placeholder="Enter your phone number"
-                value={formInfo.mobile}
-                onChange={({ target}) => {setFormInfo({ ...formInfo, mobile: target.value })}}
-                className='w-full text-[.9rem] border rounded-lg bg-transparent border-gray-500 p-3 focus:outline-none'
-              />
-            </div>
-
-            <div className='flex flex-col w-full'>
-              <div className='text-[.9rem] gap-3 pb-2'>
-                Receipt (optional)
-              </div>
-              <div
-                  className="border-dashed border flex flex-col gap-2 items-center border-gray-400 p-4 rounded-lg cursor-pointer"
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
-                >
-                  {fileName ? (
-                    <div className='text-[1rem]'>{fileName}</div>
-                  ) : (
-                    <BsCloudUploadFill className="text-black text-[1.5rem]"/>
-                  )}
-
-                  <label htmlFor="fileInput" className="cursor-pointer text-[.9rem]">
-                    Drop your file here or <span className="font-semibold">click here</span> to upload
-                  </label>
-                  <span className='text-[.6rem]'>File should be PNG, JPEG, JPG, PDF, DOC (max 2MB)</span>
+          
+          <form className='flex flex-col mt-10 gap-5' onSubmit={handleSubmit}>
+            {/* <h1>{surveyForm.title}</h1> */}
+            {surveyForm.fields?.map((field: any) => (
+              <div key={field.label} className='flex flex-col w-full'>
+                <label className='text-[.9rem] gap-3 pb-2'>{field.label}</label>
+                {field.type === 'text' && (
                   <input
-                    type="file"
-                    id="fileInput"
-                    className="hidden"
-                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                    onChange={handleFileChange}
+                    type="text"
+                    name={field.label}
+                    value={formInfo[field.label]}
+                    className='w-full text-[.9rem] border rounded-lg bg-transparent border-gray-500 p-3 focus:outline-none'
+                    onChange={handleChange}
                   />
-              </div>
-            </div>
+                )}
+                {field.type === 'email' && (
+                  <input
+                    type="email"
+                    name={field.label}
+                    value={formInfo[field.label]}
+                    className='w-full text-[.9rem] border rounded-lg bg-transparent border-gray-500 p-3 focus:outline-none'
+                    onChange={handleChange}
+                  />
+                )}
+                {field.type === 'date' && (
+                  <input
+                    type="date"
+                    name={field.label}
+                    value={formInfo[field.label]}
+                    className='w-full text-[.9rem] border rounded-lg bg-transparent border-gray-500 p-3 focus:outline-none'
+                    onChange={handleChange}
+                  />
+                )}
+                {field.type === 'textarea' && (
+                  <textarea
+                    name={field.label}
+                    value={formInfo[field.label]}
+                    className='w-full text-[.9rem] border rounded-lg bg-transparent border-gray-500 p-3 focus:outline-none'
+                    onChange={handleChange}
+                  />
+                )}
+                {field.type === 'select' && (
+                  <select
+                    name={field.label}
+                    value={formInfo[field.label]}
+                    className='w-full text-[.9rem] border rounded-lg bg-transparent border-gray-500 p-3 focus:outline-none'
+                    onChange={handleChange}
+                  >
+                    <option disabled value="">Please Select</option>
+                    {field.options.map((option: any) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {field.type === 'image' && (
+                  <div
+                    className="border-dashed border flex flex-col gap-2 items-center border-gray-400 p-4 rounded-lg cursor-pointer"
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, field.label)}
+                  >
+                    {fileNames[field.label] ? (
+                      <div className='text-[1rem]'>{fileNames[field.label]}</div>
+                    ) : (
+                      <BsCloudUploadFill className="text-black text-[1.5rem]" />
+                    )}
 
-            <div className='flex flex-col w-full'>
-              <div className='text-[.9rem] gap-3'>
-                Addtional Info
+                    <label htmlFor="fileInput" className="cursor-pointer text-[.9rem]">
+                      Drop your file here or <span className="font-semibold">click here</span> to upload
+                    </label>
+                    <span className='text-[.6rem]'>File should be PNG, JPEG, JPG (max 2MB)</span>
+                    <input
+                      type="file"
+                      id="fileInput"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={(e) => handleFileChange(e, field.label)}
+                    />
+                  </div>
+                )}
+                {/* {errors[field.label] && <div style={{ color: 'red' }}>{errors[field.label]}</div>} */}
               </div>
-              <textarea
-                value={formInfo.addtionalInfo}
-                onChange={({ target}) => {setFormInfo({ ...formInfo, addtionalInfo: target.value })}}
-                className='w-full mt-3 text-[.9rem] border rounded-lg bg-transparent border-gray-500 p-3 focus:outline-none'
-              />
-            </div>
-
+            ))}
             <div className="flex flex-row items-center gap-3 w-full">
               <BiSquare className={`${term === false ? '' : 'hidden'} text-2xl`} onClick={() => setTerm(true)}/>
               <BiCheckSquare className={`${term === true ? '' : 'hidden'} font-semibold text-2xl`} onClick={() => setTerm(false)}/>
@@ -1081,17 +1066,15 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
                 You consent to us using the data you have provided according to our <span className="font-semibold">Terms and Conditions</span>
               </div>
             </div>
-
             <div className='flex flex-col mt-5 w-full items-center'>
-              <div onClick={handleSubmit} className='bg-[#2985E0] py-2 px-16 text-lg text-white font-semibold rounded-lg cursor-pointer'>
-                {!isSubmitting ? 'SUBMIT' : 'Submitting ....'}
-              </div>
+              <button type="submit" disabled={isSubmitting} className='bg-[#2985E0] py-2 px-16 text-lg text-white font-semibold rounded-lg cursor-pointer'>
+                {isSubmitting ? 'Submitting...' : 'Submit'}
+              </button>
             </div>
-          </div>
-
+          </form>
         </div>
       ) : (
-        <div className='flex flex-col gap-5 items-center md:p-10 p-5 lg:w-3/5 w-2/3 lg:mb-0 mb-32 lg:mt-0 mt-20'>
+        <div className='flex flex-col gap-5 items-center md:p-10 p-5 w-full lg:mb-0 mb-32 lg:mt-0 mt-20'>
           <img src={icon} alt='logo' className=''/>
           <div className={`lg:text-[2rem] text-xl text-center font-semibold`}>
             We’ve got your data🎉

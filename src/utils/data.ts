@@ -168,3 +168,10 @@ export const marketCommentQuery =  `*[_type == "marketComment" && isReply == fal
     dislikes
   },
 }`;
+
+export const formQuery = `*[_type == "form" && status == true]{
+  _id,
+  title,
+  description,
+  fields
+}[0]`
