@@ -1,14 +1,9 @@
 export const sidebarFaqList = [
-    {
-      id: 1,
-      title: 'What we use your data for',
-      description: `We've made it easy! Explore our step-by-step guide to getting started with [Company/Product Name]. From account creation to utilizing our services, we'll walk you through the process.`,
-    },
-    {
-      id: 2,
-      title: 'What we use your data for',
-      description: `We've made it easy! Explore our step-by-step guide to getting started with [Company/Product Name]. From account creation to utilizing our services, we'll walk you through the process.`,
-    },
+  {
+    id: 1,
+    title: 'How we use your data',
+    description: `At vYe we are committed to handling personal data in a fair and transparent way. As part of this commitment we publish information about how your data is processed in documents referred to as Privacy Notices or Privacy Policies. Due to variations in the way we capture data relating to certain audiences, we have created a privacy notice/policy for each audience. <br/> <br/>Please use our Contact us form to request further details and a member of the team will be happy to help.`,
+  },
 ]
 
 export const generalFaqList = [

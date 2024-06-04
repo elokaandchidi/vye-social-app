@@ -609,7 +609,7 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
     if (selectedPin) {
       fetchPinDetails();
     }
-  },[selectedPin]);
+  },[selectedPin, isLoading]);
 
   useEffect(() => {
     if (viewMarketComment) {
@@ -934,7 +934,7 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
               <div className='text-xs text-gray-400 pt-2'>{mainPin.source}</div>
             </div>
             <NavLink to='/#Survey' className={`${isMobile? 'hidden' :''} p-5  underline font-medium`}>
-              please participate in our next survey
+              Please participate in our next survey
             </NavLink>
 
             <div onClick={()=> handlePin(mainPin._id)} className="flex flex-row bg-comment bg-no-repeat bg-cover items-center justify-center h-9 w-9 text-sm text-white font-semibold">
@@ -942,7 +942,7 @@ const Home = ({isMinimize, searchTerm} : MenuProps) => {
             </div>
           </div>
           <NavLink to='/#Survey' className={`${isMobile? '' :'hidden'} underline font-medium`}>
-            please participate in our next survey
+            Please participate in our next survey
           </NavLink>
         </div>
         <div className={`${isMobile ? 'grid-cols-1 gap-10' :'grid-cols-3 gap-5'} mt-10 grid w-full`}>

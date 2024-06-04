@@ -1,5 +1,4 @@
 import { NavLink } from 'react-router-dom';
-import { FaSquareFacebook, FaSquareInstagram, FaSquareXTwitter } from 'react-icons/fa6';
 import { isMobile } from 'react-device-detect';
 	
 

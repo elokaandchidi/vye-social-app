@@ -4,6 +4,7 @@ import { Routes, Route, useLocation, NavLink } from 'react-router-dom';
 import { BiMenu, BiSolidSearch } from "react-icons/bi";
 import { FaCircleMinus, FaCirclePlus } from 'react-icons/fa6';
 import {isMobile} from 'react-device-detect';
+import parse from 'html-react-parser';
 
 import Footer from '../components/reuseables/footer';
 import Sidebar from '../components/reuseables/sidebar';
@@ -165,7 +166,7 @@ const IndexRoutes = () => {
                       <FaCircleMinus className={`${selectedFaqToView === faq.id ? '' : 'hidden'} cursor-pointer`} onClick={() => setSelectedFaqToView(0)}/>
                     </div>
                     <div className={`${selectedFaqToView === faq.id ? '' : 'hidden'} text-sm w-5/6`}>
-                      {faq.description}
+                      {parse(faq.description)} 
                     </div>
                   </div>
                 )}
